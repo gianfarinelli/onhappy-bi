@@ -803,7 +803,13 @@ async function carregarDados(){
 
     // Consolidadores
     if(dados.aereo_consolidadores?.length>0){
-      consolData=dados.aereo_consolidadores.map(r=>({n:String(r.consolidador||''),e:parseInt(r.emissoes)||0,gmv:parseFloat(r.gmv)||0,profit:parseFloat(r.profit)||0,tr:parseFloat(r.take_rate)||0,tk:parseFloat(r.ticket_medio)||0}));
+      consolData=dados.aereo_consolidadores.map(r=>{
+        const gmv=parseFloat(r.gmv)||0;
+        const profit=parseFloat(r.profit)||0;
+        // Recalcular TR diretamente de profit/gmv para evitar erros do BQ
+        const tr=gmv>0?parseFloat((profit/gmv*100).toFixed(2)):0;
+        return{n:String(r.consolidador||''),e:parseInt(r.emissoes)||0,gmv,profit,tr,tk:parseFloat(r.ticket_medio)||0};
+      });
     }
 
     // Recalcular trDia e profDia
