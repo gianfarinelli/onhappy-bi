@@ -765,7 +765,10 @@ async function carregarDados(){
         const mo=parseInt(iso.substring(5,7)),yr=parseInt(iso.substring(2,4));
         const m=`${mN[mo]}/${yr}`;
         const exist=realMensal.find(x=>x.m===m)||{vidas_acum:0,vidas_novas:0};
-        return{m,gmv:parseFloat(r.gmv)||0,profit:parseFloat(r.profit)||0,tr:parseFloat(r.take_rate)||0,emissoes:parseInt(r.emissoes)||0,vidas_acum:exist.vidas_acum,vidas_novas:exist.vidas_novas};
+        // Se take_rate vier em decimal (ex: 0.0954), converter para percentual (9.54)
+        const trRaw=parseFloat(r.take_rate)||0;
+        const tr=trRaw>0&&trRaw<1?trRaw*100:trRaw;
+        return{m,gmv:parseFloat(r.gmv)||0,profit:parseFloat(r.profit)||0,tr:parseFloat(tr.toFixed(2)),emissoes:parseInt(r.emissoes)||0,vidas_acum:exist.vidas_acum,vidas_novas:exist.vidas_novas};
       });
       if(novos.length>0)realMensal=novos;
     }
