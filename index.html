@@ -765,9 +765,9 @@ async function carregarDados(){
         const mo=parseInt(iso.substring(5,7)),yr=parseInt(iso.substring(2,4));
         const m=`${mN[mo]}/${yr}`;
         const exist=realMensal.find(x=>x.m===m)||{vidas_acum:0,vidas_novas:0};
-        // Se take_rate vier em decimal (ex: 0.0954), converter para percentual (9.54)
+        // Normalizar TR: se >100 está em base errada (ex: 954 = 9.54%), se <1 está em decimal (0.0954)
         const trRaw=parseFloat(r.take_rate)||0;
-        const tr=trRaw>0&&trRaw<1?trRaw*100:trRaw;
+        const tr=trRaw>100?trRaw/100:trRaw>0&&trRaw<1?trRaw*100:trRaw;
         return{m,gmv:parseFloat(r.gmv)||0,profit:parseFloat(r.profit)||0,tr:parseFloat(tr.toFixed(2)),emissoes:parseInt(r.emissoes)||0,vidas_acum:exist.vidas_acum,vidas_novas:exist.vidas_novas};
       });
       if(novos.length>0)realMensal=novos;
@@ -936,12 +936,16 @@ function renderBigNumbers(){
   set('pct-gmv-ano',pctAno+'%');set('lbl-gmv-meses',mesesComDados.map(m=>m.m.split('/')[0]).join('+'));
   set('fc-gmv-ano','~'+fBRL(forecast));set('fc-gmv-ano-sub',`Ritmo ${fBRL(Math.round(gmvAno/Math.max(mesesComDados.length,1)))}/mês`);
   const gmvMesArr=gmvDia.filter(r=>r.mISO===mesISO);
-  const gmvMes=gmvMesArr.length>0?gmvMesArr.reduce((s,r)=>s+r.f+r.h+r.b,0):lastM.gmv;
-  const pctMes=(gmvMes/metaGmvMes*100).toFixed(1);
-  set('card-gmv-mes',fBRL(gmvMes));set('sub-gmv-mes',`Meta: ${fBRL(metaGmvMes)}`);
+  const gmvMesAcum=gmvMesArr.length>0?gmvMesArr.reduce((s,r)=>s+r.f+r.h+r.b,0):lastM.gmv;
+  // Forecast correto: acumulado / dias decorridos * dias totais do mês
+  const diasDecorridosMes=gmvMesArr.length>0?gmvMesArr.length:1;
+  const gmvMesForecast=Math.round(gmvMesAcum/diasDecorridosMes*nDias);
+  const pctMes=(gmvMesAcum/metaGmvMes*100).toFixed(1);
+  const pctMesFc=(gmvMesForecast/metaGmvMes*100).toFixed(1);
+  set('card-gmv-mes',fBRL(gmvMesAcum));set('sub-gmv-mes',`Meta: ${fBRL(metaGmvMes)}`);
   document.getElementById('bar-gmv-mes').style.width=Math.min(pctMes,100)+'%';set('pct-gmv-mes',pctMes+'%');
-  set('fc-gmv-mes-sub',gmvMes>=metaGmvMes?`+${fBRL(gmvMes-metaGmvMes)}`:`−${fBRL(metaGmvMes-gmvMes)}`);
-  set('fc-gmv-mes','~'+fBRL(gmvMes));set('fc-gmv-mes-sub2',`Ritmo ~${fBRL(Math.round(gmvMes/Math.max(gmvMesArr.length,1)))}/dia`);
+  set('fc-gmv-mes-sub',gmvMesAcum>=metaGmvMes?`+${fBRL(gmvMesAcum-metaGmvMes)}`:`−${fBRL(metaGmvMes-gmvMesAcum)}`);
+  set('fc-gmv-mes','~'+fBRL(gmvMesForecast));set('fc-gmv-mes-sub2',`${diasDecorridosMes} dias · ritmo ~${fBRL(Math.round(gmvMesAcum/diasDecorridosMes))}/dia · fc ${pctMesFc}% meta`);
   const d1ok=d1.gmv>=metaDiaGmv;
   set('card-gmv-d1',fBRL(d1.gmv));setStyle('card-gmv-d1','color',d1ok?'var(--green)':'var(--amber)');
   set('sub-gmv-d1',`Meta diária: ${fBRL(metaDiaGmv)}`);
@@ -1080,15 +1084,32 @@ function renderExcl(){
 
 // ══ CUPONS ══
 function renderCupons(){
-  set('cup-d1-val',fBRL(cupD1.tot));set('cup-d1-sub',`${cupD1.qtot} cupons · ${cupD1.qmkt} MKT + ${cupD1.qprem} Prem.`);
-  set('cup-mes-val',fBRL(cupMesVig.tot));set('cup-mes-sub',`Abr/26 · ${cupMesVig.qtot} cupons`);
-  set('cup-ano-val',fBRL(cupAno.tot));set('cup-ano-sub',`${cupAno.qtot} cupons em 2026`);
-  const pctD1Mkt=(cupD1.mkt/cupD1.tot*100).toFixed(1),pctD1Prem=(cupD1.prem/cupD1.tot*100).toFixed(1);
-  const pctMesMkt=(cupMesVig.mkt/cupMesVig.tot*100).toFixed(1),pctMesPrem=(cupMesVig.prem/cupMesVig.tot*100).toFixed(1);
-  const pctAnoMkt=(cupAno.mkt/cupAno.tot*100).toFixed(1),pctAnoPrem=(cupAno.prem/cupAno.tot*100).toFixed(1);
-  set('share-d1-mkt',`${fBRL(cupD1.mkt)} (${pctD1Mkt}%)`);set('share-d1-prem',`${fBRL(cupD1.prem)} (${pctD1Prem}%)`);set('share-d1-tot',fBRL(cupD1.tot));
-  set('share-mes-mkt',`${fBRL(cupMesVig.mkt)} (${pctMesMkt}%)`);set('share-mes-prem',`${fBRL(cupMesVig.prem)} (${pctMesPrem}%)`);set('share-mes-tot',fBRL(cupMesVig.tot));
-  set('share-ano-mkt',`${fBRL(cupAno.mkt)} (${pctAnoMkt}%)`);set('share-ano-prem',`${fBRL(cupAno.prem)} (${pctAnoPrem}%)`);set('share-ano-tot',fBRL(cupAno.tot));
+  // GMV por período para calcular share correto (cupom/GMV)
+  const ontemISO=getOntemISO(),mesISO=getMesISO(ontemISO);
+  const mN={Jan:'01',Fev:'02',Mar:'03',Abr:'04',Mai:'05',Jun:'06',Jul:'07',Ago:'08',Set:'09',Out:'10',Nov:'11',Dez:'12'};
+  const lastM=realMensal.find(r=>{const p=r.m.split('/');return'20'+p[1]+'-'+mN[p[0]]===mesISO;})||realMensal.filter(r=>r.gmv>0).slice(-1)[0];
+  const gmvD1=trDia.find(r=>r.mISO===mesISO&&r.d===formatDia(ontemISO))?.gmv||trDia.filter(r=>r.mISO===mesISO).slice(-1)[0]?.gmv||0;
+  const gmvMesAcum=gmvDia.filter(r=>r.mISO===mesISO).reduce((s,r)=>s+r.f+r.h+r.b,0)||lastM?.gmv||0;
+  const gmvAno=realMensal.reduce((s,m)=>s+(m.gmv||0),0);
+
+  // Share = cupom / GMV do período
+  const pctD1Mkt=gmvD1>0?(cupD1.mkt/gmvD1*100).toFixed(1):'0';
+  const pctD1Prem=gmvD1>0?(cupD1.prem/gmvD1*100).toFixed(1):'0';
+  const pctD1Tot=gmvD1>0?(cupD1.tot/gmvD1*100).toFixed(1):'0';
+  const pctMesMkt=gmvMesAcum>0?(cupMesVig.mkt/gmvMesAcum*100).toFixed(1):'0';
+  const pctMesPrem=gmvMesAcum>0?(cupMesVig.prem/gmvMesAcum*100).toFixed(1):'0';
+  const pctMesTot=gmvMesAcum>0?(cupMesVig.tot/gmvMesAcum*100).toFixed(1):'0';
+  const pctAnoMkt=gmvAno>0?(cupAno.mkt/gmvAno*100).toFixed(1):'0';
+  const pctAnoPrem=gmvAno>0?(cupAno.prem/gmvAno*100).toFixed(1):'0';
+  const pctAnoTot=gmvAno>0?(cupAno.tot/gmvAno*100).toFixed(1):'0';
+
+  set('cup-d1-val',fBRL(cupD1.tot));set('cup-d1-sub',`${cupD1.qtot} cupons · ${pctD1Tot}% do GMV`);
+  set('cup-mes-val',fBRL(cupMesVig.tot));set('cup-mes-sub',`${cupMesVig.qtot} cupons · ${pctMesTot}% do GMV`);
+  set('cup-ano-val',fBRL(cupAno.tot));set('cup-ano-sub',`${cupAno.qtot} cupons · ${pctAnoTot}% do GMV`);
+
+  set('share-d1-mkt',`${fBRL(cupD1.mkt)} (${pctD1Mkt}% GMV)`);set('share-d1-prem',`${fBRL(cupD1.prem)} (${pctD1Prem}% GMV)`);set('share-d1-tot',`${fBRL(cupD1.tot)} · ${pctD1Tot}% GMV`);
+  set('share-mes-mkt',`${fBRL(cupMesVig.mkt)} (${pctMesMkt}% GMV)`);set('share-mes-prem',`${fBRL(cupMesVig.prem)} (${pctMesPrem}% GMV)`);set('share-mes-tot',`${fBRL(cupMesVig.tot)} · ${pctMesTot}% GMV`);
+  set('share-ano-mkt',`${fBRL(cupAno.mkt)} (${pctAnoMkt}% GMV)`);set('share-ano-prem',`${fBRL(cupAno.prem)} (${pctAnoPrem}% GMV)`);set('share-ano-tot',`${fBRL(cupAno.tot)} · ${pctAnoTot}% GMV`);
   mkBar("c-cup-share-periodo",['D-1','Mês (Abr/26)','Ano 2026'],[{label:"MKT (Onhappy)",data:[cupD1.mkt,cupMesVig.mkt,cupAno.mkt],backgroundColor:"rgba(91,75,245,.75)",borderRadius:4},{label:"Premiação (Empresa)",data:[cupD1.prem,cupMesVig.prem,cupAno.prem],backgroundColor:"rgba(192,123,0,.75)",borderRadius:4}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
   mkBar("c-cup-compare",["D-1","Mês","Ano 2026"],[{label:"MKT (Onhappy)",data:[cupD1.mkt,cupMesVig.mkt,cupAno.mkt],backgroundColor:"rgba(91,75,245,.75)",borderRadius:4},{label:"Premiação (Empresa)",data:[cupD1.prem,cupMesVig.prem,cupAno.prem],backgroundColor:"rgba(192,123,0,.75)",borderRadius:4}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
   const mkt=cuponsBase.filter(r=>r.tipo==="MKT"),prem=cuponsBase.filter(r=>r.tipo==="Premiação");
