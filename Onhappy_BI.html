@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Onhappy BI · Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+[data-theme="light"]{--bg:#F0EEFF;--bg2:#fff;--panel:#fff;--border:#E0DAFF;--text:#0D0D0D;--muted:#6B6B8A;--faint:#F5F3FF;--accent:#5B4BF5;--a2:#00C9A7;--green:#0F9B6E;--red:#E53E3E;--amber:#C07B00;--mint:#B8F5E0;--mint-d:#0F9B6E;--pink:#FFD6E8;--pink-d:#C0366E;--yellow:#E8F5A0;--yellow-d:#7A8A00;--lilac:#E8E5FF;--shadow:0 2px 16px rgba(91,75,245,.10)}
+[data-theme="dark"]{--bg:#100D24;--bg2:#17123A;--panel:#1E1847;--border:#2D2660;--text:#F0EEFF;--muted:#9B94CC;--faint:#231D50;--accent:#7B6BFF;--a2:#00E5B8;--green:#2DD4A0;--red:#FC8181;--amber:#F6C344;--mint:#0F3D2E;--mint-d:#2DD4A0;--pink:#3D1A2B;--pink-d:#FC8FB0;--yellow:#2A2E0A;--yellow-d:#D4E030;--lilac:#1A1645;--shadow:0 4px 24px rgba(0,0,0,.5)}
+html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background .3s,color .3s;margin:0;padding:0;width:100%;overflow-x:hidden}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:228px;background:var(--bg2);border-right:1px solid var(--border);z-index:200;display:flex;flex-direction:column;overflow-y:auto}
+.s-logo{padding:16px 16px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
+.s-nav{flex:1;padding:10px 8px}
+.s-sec{margin-bottom:4px}
+.s-lbl{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px 10px 3px;display:block}
+.nb{display:flex;align-items:center;gap:9px;width:100%;padding:8px 10px;border-radius:12px;border:none;background:transparent;color:var(--muted);font-size:12.5px;font-weight:500;cursor:pointer;text-align:left;transition:.15s;font-family:inherit}
+.nb:hover{background:var(--lilac);color:var(--accent)}
+.nb.active{background:var(--lilac);color:var(--accent);font-weight:700;border:1.5px solid rgba(91,75,245,.3)}
+.s-foot{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.tt{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--muted)}
+.tk{position:relative;width:36px;height:20px;background:var(--border);border-radius:10px;cursor:pointer;transition:.2s}
+.tk.on{background:var(--accent)}
+.tk-k{position:absolute;top:2px;left:2px;width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s}
+.tk.on .tk-k{transform:translateX(16px)}
+.main{margin-left:228px;padding:26px 30px;min-height:100vh}
+.page{display:none}.page.active{display:block}
+.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;gap:8px}
+.pt{font-size:21px;font-weight:800}.ps{font-size:11px;color:var(--muted);margin-top:3px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:5px 12px;border-radius:20px;font-weight:600}
+.bg{background:var(--mint);color:var(--mint-d);border:1.5px solid var(--mint-d)}
+.ba{background:var(--yellow);color:var(--yellow-d);border:1.5px solid var(--yellow-d)}
+.br{background:var(--pink);color:var(--pink-d);border:1.5px solid var(--pink-d)}
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.mb{margin-bottom:18px}
+.card{background:var(--panel);border:2px solid var(--border);border-radius:20px;padding:18px;box-shadow:var(--shadow);transition:.2s}
+.card:hover{border-color:var(--accent)}
+.k-lbl{font-size:10px;color:var(--muted);font-weight:700;margin-bottom:6px;text-transform:uppercase;letter-spacing:.07em}
+.k-val{font-size:24px;font-weight:800;line-height:1.1;color:var(--text);margin-bottom:5px}
+.k-val.xl{font-size:28px}.k-val.xxl{font-size:34px}
+.k-sub{font-size:11px;color:var(--muted);margin-bottom:8px}
+.bar-bg{height:5px;background:var(--faint);border-radius:3px;overflow:hidden;margin-bottom:5px}
+.bar-f{height:5px;border-radius:3px;transition:width .8s}
+.k-foot{display:flex;justify-content:space-between;font-size:11px}
+.pct{font-weight:700}.fc{color:var(--muted)}
+.fcast{background:var(--lilac);border:1.5px solid var(--accent);border-radius:14px;padding:13px;margin-top:12px}
+.fcast-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:4px}
+.fcast-val{font-size:18px;font-weight:800;color:var(--text)}
+.fcast-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.panel{background:var(--panel);border:2px solid var(--border);border-radius:20px;padding:20px;margin-bottom:18px;box-shadow:var(--shadow)}
+.ptitle{font-size:13px;font-weight:700;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.ptitle span{color:var(--text)}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed}
+.tbl th{text-align:left;font-size:10px;font-weight:700;color:var(--muted);padding:7px 10px;border-bottom:2px solid var(--border);text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.tbl td{padding:9px 10px;border-bottom:1px solid var(--faint);color:var(--text);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tbody tr:hover td{background:var(--faint)}
+.tbl-r{text-align:right!important}
+.tbl-tot td{font-weight:700;background:rgba(91,75,245,.06)!important}
+.tbl-wrap{overflow-x:auto}
+.trb{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;white-space:nowrap}
+.chip-f{background:rgba(91,75,245,.12);color:var(--accent);font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;display:inline-block}
+.chip-h{background:rgba(0,201,167,.12);color:var(--a2);font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;display:inline-block}
+.chip-b{background:var(--yellow);color:var(--yellow-d);font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;display:inline-block}
+.alert{border-radius:10px;padding:12px 16px;margin-bottom:10px;font-size:12px;display:flex;gap:10px;align-items:flex-start;line-height:1.6}
+.a-ok{background:rgba(15,155,110,.07);border-left:3px solid var(--green)}
+.a-warn{background:rgba(192,123,0,.07);border-left:3px solid var(--amber)}
+.alert strong{color:var(--text)}
+.tab-bar{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.tb{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+.tb:hover{color:var(--accent);background:var(--lilac)}
+.tb.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.tp{display:none}.tp.active{display:block}
+.sy{overflow-y:auto;max-height:420px}
+.mom-up{color:var(--green);font-weight:700;font-size:11px}
+.mom-dn{color:var(--red);font-weight:700;font-size:11px}
+.mom-eq{color:var(--muted);font-weight:600;font-size:11px}
+.yoy-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+.yoy-card{background:var(--panel);border:2px solid var(--border);border-radius:20px;padding:16px;box-shadow:var(--shadow)}
+.yoy-lbl{font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px}
+.yoy-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--faint);font-size:12px}
+.yoy-row:last-child{border-bottom:none}
+.yoy-year{color:var(--muted);font-weight:600}
+.yoy-val{font-weight:700;color:var(--text)}
+.yoy-delta{font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px}
+.yoy-pos{background:rgba(15,155,110,.12);color:var(--green)}
+.yoy-neg{background:rgba(229,62,62,.12);color:var(--red)}
+.daily-date-banner{background:linear-gradient(135deg,var(--accent),#8B7BFF);border-radius:20px;padding:18px 24px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.daily-date-title{font-size:22px;font-weight:800;color:#fff}
+.daily-date-sub{font-size:12px;color:rgba(255,255,255,.75);margin-top:3px}
+.daily-section{margin-bottom:6px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--accent);padding:0 2px}
+.kpi-row{display:grid;gap:14px;margin-bottom:14px}
+.kpi-row.c2{grid-template-columns:repeat(2,1fr)}
+.kpi-row.c3{grid-template-columns:repeat(3,1fr)}
+.kpi-card{background:var(--panel);border:2px solid var(--border);border-radius:18px;padding:16px 18px;box-shadow:var(--shadow);transition:.2s}
+.kpi-card:hover{border-color:var(--accent)}
+.kpi-card.highlight{border-color:var(--accent);background:var(--lilac)}
+.kc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:5px}
+.kc-val{font-size:26px;font-weight:800;line-height:1.1;margin-bottom:4px}
+.kc-meta{font-size:11px;color:var(--muted);margin-bottom:8px}
+.kc-bar{height:6px;background:var(--faint);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.kc-bar-f{height:6px;border-radius:3px;transition:width .8s}
+.kc-foot{display:flex;justify-content:space-between;align-items:center;font-size:11px}
+.kc-pct{font-weight:800;font-size:13px}
+.kc-delta{color:var(--muted)}
+.tr-breakdown{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.tr-seg{background:var(--faint);border-radius:12px;padding:10px 12px;text-align:center}
+.tr-seg-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.tr-seg-val{font-size:18px;font-weight:800}
+.tr-seg-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.cup-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.cup-item{background:var(--faint);border-radius:10px;padding:9px 12px}
+.cup-item-lbl{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:3px}
+.cup-item-val{font-size:15px;font-weight:800;color:var(--text)}
+.cup-item-sub{font-size:10px;color:var(--muted)}
+.fc-detail{margin-top:10px;padding:10px;background:var(--faint);border-radius:10px;font-size:11px;color:var(--muted);line-height:1.8}
+.fc-detail div{display:flex;justify-content:space-between}
+.fc-detail span:last-child{font-weight:600;color:var(--text)}
+@media(max-width:900px){.sidebar{display:none}.main{margin-left:0;padding:16px}.g4,.kpi-row.c4{grid-template-columns:repeat(2,1fr)}.yoy-grid,.kpi-row.c3{grid-template-columns:1fr 1fr}.kpi-row.c2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <div class="s-logo">
+    <svg width="160" height="38" viewBox="0 0 160 38" fill="none">
+      <path d="M6 26 Q14 34 24 27" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" fill="none"/>
+      <g transform="translate(9,12) rotate(-35)">
+        <path d="M0 0 L7 -2Q9.5-2 9.5 0Q9.5 2 7 2L0 0Z" fill="var(--accent)"/>
+        <path d="M1.5-.5L-2.5-5L.5-3.5L2.5-.5Z" fill="var(--accent)"/>
+        <path d="M6.5.5L5 4L7.5 2.5L8.5.5Z" fill="var(--accent)"/>
+      </g>
+      <text x="30" y="27" font-family="'Plus Jakarta Sans','Arial Black',sans-serif" font-size="22" font-weight="800" font-style="italic" fill="var(--accent)" letter-spacing="-1">onhappy</text>
+    </svg>
+    <div style="font-size:10px;color:var(--muted);margin-top:2px">BI Dashboard · company 4609</div>
+  </div>
+  <nav class="s-nav">
+    <div class="s-sec">
+      <span class="s-lbl">Visão Executiva</span>
+      <button class="nb active" onclick="nav('daily')"><span>📋</span> Report Daily</button>
+      <button class="nb" onclick="nav('bignumbers')"><span>📊</span> Big Numbers</button>
+      <button class="nb" onclick="nav('metas')"><span>🎯</span> Metas & Histórico</button>
+      <button class="nb" onclick="nav('historico')"><span>📆</span> Histórico 2024–2025</button>
+      <button class="nb" onclick="nav('yoy')"><span>📉</span> Análise YoY</button>
+    </div>
+    <div class="s-sec">
+      <span class="s-lbl">Indicadores</span>
+      <button class="nb" onclick="nav('vidas')"><span>👥</span> Vidas Ativas</button>
+      <button class="nb" onclick="nav('takerate')"><span>📈</span> Take Rate</button>
+      <button class="nb" onclick="nav('cupons')"><span>🎫</span> Cupons & Saldos</button>
+      <button class="nb" onclick="nav('compras')"><span>🧳</span> Compras & Cobertura</button>
+    </div>
+    <div class="s-sec">
+      <span class="s-lbl">Detalhe TR</span>
+      <button class="nb" onclick="nav('tr-aereo')"><span>✈️</span> Aéreo</button>
+      <button class="nb" onclick="nav('tr-hotel')"><span>🏨</span> Hotel</button>
+      <button class="nb" onclick="nav('tr-excl')"><span>⭐</span> Ofertas Exclusivas</button>
+    </div>
+  </nav>
+  <div class="s-foot">
+    <div class="tt">
+      <span id="th-lbl">☀️ Modo Claro</span>
+      <div class="tk" id="th-tog" onclick="toggleTheme()"><div class="tk-k"></div></div>
+    </div>
+    <div style="margin-top:8px;padding:10px;background:var(--faint);border-radius:10px;border:1px solid var(--border)">
+      <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--accent);margin-bottom:6px">Última Atualização</div>
+      <div style="font-size:10px;color:var(--text);line-height:1.8">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">📊 GMV & TR</span><span id="rod-gmv" style="font-weight:600">—</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">👥 Vidas</span><span id="rod-vidas" style="font-weight:600">—</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--muted)">🎫 Cupons</span><span id="rod-cupons" style="font-weight:600">—</span></div>
+      </div>
+      <div id="rod-script" style="margin-top:8px;padding:8px;border-radius:8px;background:var(--faint);border:1px solid var(--border)">
+        <div style="font-size:9px;font-weight:700;color:var(--muted);margin-bottom:2px">🔄 Conectando...</div>
+        <div style="font-size:12px;font-weight:700;color:var(--text)">Aguardando dados...</div>
+      </div>
+      <div style="font-size:9px;color:var(--muted);margin-top:6px">Fonte: BQ dw-onfly-prd · company 4609</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main">
+
+<!-- REPORT DAILY -->
+<div id="page-daily" class="page active">
+  <div class="daily-date-banner">
+    <div>
+      <div class="daily-date-title" id="daily-title">📋 Report Daily — carregando...</div>
+      <div class="daily-date-sub">Dados de D-1 · silver_onfly_old_all_emissions · company_id=4609</div>
+    </div>
+    <button onclick="enviarWhatsApp()" style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);color:#fff;font-family:inherit;font-size:12px;font-weight:700;padding:8px 16px;border-radius:20px;cursor:pointer;display:flex;align-items:center;gap:6px" onmouseover="this.style.background='rgba(255,255,255,.35)'" onmouseout="this.style.background='rgba(255,255,255,.2)'">
+      <span style="font-size:16px">💬</span> Enviar via WhatsApp
+    </button>
+  </div>
+  <div class="daily-section">💰 GMV do Dia</div>
+  <div class="kpi-row c3 mb">
+    <div class="kpi-card highlight">
+      <div class="kc-lbl">GMV Realizado D-1</div>
+      <div class="kc-val" id="d-gmv-val" style="color:var(--accent)">—</div>
+      <div class="kc-meta" id="d-gmv-meta">—</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="d-gmv-bar" style="width:0%"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="d-gmv-pct">—</span><span class="kc-delta" id="d-gmv-delta">—</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kc-lbl">Ticket Médio D-1</div>
+      <div class="kc-val" id="d-tm-val">—</div>
+      <div class="kc-meta">Meta de TM: R$ 1.100</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="d-tm-bar" style="width:0%"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="d-tm-pct">—</span><span class="kc-delta" id="d-tm-delta">—</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kc-lbl">Emissões D-1</div>
+      <div class="kc-val" id="d-emis-val">—</div>
+      <div class="kc-meta" id="d-emis-sub">—</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="d-emis-bar" style="width:0%;background:var(--accent)"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="d-emis-pct" style="color:var(--accent)">—</span><span class="kc-delta" id="d-emis-delta">—</span></div>
+    </div>
+  </div>
+  <div class="daily-section">📈 Take Rate do Dia</div>
+  <div class="kpi-row c2 mb">
+    <div class="kpi-card">
+      <div class="kc-lbl">Take Rate Total D-1</div>
+      <div class="kc-val" id="d-tr-val">—</div>
+      <div class="kc-meta">Meta TR: 8,00%</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="d-tr-bar" style="width:0%"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="d-tr-pct">—</span><span class="kc-delta" id="d-tr-delta">—</span></div>
+      <div class="tr-breakdown">
+        <div class="tr-seg"><div class="tr-seg-lbl">✈️ Aéreo</div><div class="tr-seg-val" id="d-tr-flight">—</div><div class="tr-seg-sub" id="d-tr-flight-sub">—</div></div>
+        <div class="tr-seg"><div class="tr-seg-lbl">🏨 Hotel</div><div class="tr-seg-val" id="d-tr-hotel">—</div><div class="tr-seg-sub" id="d-tr-hotel-sub">—</div></div>
+        <div class="tr-seg"><div class="tr-seg-lbl">🚌 Ônibus</div><div class="tr-seg-val" id="d-tr-bus">—</div><div class="tr-seg-sub" id="d-tr-bus-sub">—</div></div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kc-lbl">Profit D-1</div>
+      <div class="kc-val" id="d-profit-val" style="color:var(--green)">—</div>
+      <div class="kc-meta" id="d-profit-meta">—</div>
+      <div style="position:relative;height:130px;margin-top:10px"><canvas id="c-daily-tr"></canvas></div>
+    </div>
+  </div>
+  <div class="daily-section">🎫 Cupons do Dia</div>
+  <div class="kpi-row c2 mb">
+    <div class="kpi-card">
+      <div class="kc-lbl">Total de Cupons Utilizados D-1</div>
+      <div class="kc-val" id="d-cup-total-val">—</div>
+      <div class="kc-meta" id="d-cup-total-meta">—</div>
+      <div class="cup-row">
+        <div class="cup-item"><div class="cup-item-lbl">🟣 MKT (Onhappy)</div><div class="cup-item-val" id="d-cup-mkt-val">—</div><div class="cup-item-sub" id="d-cup-mkt-sub">—</div></div>
+        <div class="cup-item"><div class="cup-item-lbl">🟡 Premiação (Empresa)</div><div class="cup-item-val" id="d-cup-prem-val">—</div><div class="cup-item-sub" id="d-cup-prem-sub">—</div></div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kc-lbl">Cupons como % do GMV D-1</div>
+      <div class="kc-val" id="d-cup-pct-val">—</div>
+      <div class="kc-meta" id="d-cup-pct-meta">—</div>
+      <div style="position:relative;height:130px;margin-top:10px"><canvas id="c-daily-cup"></canvas></div>
+    </div>
+  </div>
+  <div class="daily-section">🔮 Forecast do Mês</div>
+  <div class="kpi-row c2 mb">
+    <div class="kpi-card">
+      <div class="kc-lbl">📈 Forecast GMV — Mês Vigente</div>
+      <div class="kc-val" id="fc-gmv-proj" style="color:var(--accent)">—</div>
+      <div class="kc-meta" id="fc-gmv-proj-meta">—</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="fc-gmv-proj-bar" style="width:0%"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="fc-gmv-proj-pct">—</span><span class="kc-delta" id="fc-gmv-proj-delta">—</span></div>
+      <div class="fc-detail">
+        <div><span>GMV acumulado mês</span><span id="fc-gmv-acum">—</span></div>
+        <div><span>Dias decorridos (até D-1)</span><span id="fc-gmv-dias">—</span></div>
+        <div><span>Dias no mês</span><span id="fc-gmv-diasmes">—</span></div>
+        <div><span>Ritmo diário</span><span id="fc-gmv-ritmo">—</span></div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kc-lbl">👥 Forecast Vidas — Mês Vigente</div>
+      <div class="kc-val" id="fc-vidas-proj" style="color:var(--a2)">—</div>
+      <div class="kc-meta" id="fc-vidas-proj-meta">—</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="fc-vidas-proj-bar" style="width:0%;background:var(--a2)"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="fc-vidas-proj-pct" style="color:var(--a2)">—</span><span class="kc-delta" id="fc-vidas-proj-delta">—</span></div>
+      <div class="fc-detail">
+        <div><span>Vidas acumuladas mês</span><span id="fc-vidas-acum">—</span></div>
+        <div><span>Dias decorridos (até D-1)</span><span id="fc-vidas-dias">—</span></div>
+        <div><span>Meta mensal de vidas</span><span id="fc-vidas-meta-val">—</span></div>
+        <div><span>Ritmo diário</span><span id="fc-vidas-ritmo">—</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="daily-section">👥 Vidas Ativas do Dia</div>
+  <div class="kpi-row c3">
+    <div class="kpi-card">
+      <div class="kc-lbl">Vidas Ativadas D-1</div>
+      <div class="kc-val" id="d-vidas-val">—</div>
+      <div class="kc-meta" id="d-vidas-meta">—</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="d-vidas-bar" style="width:0%"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="d-vidas-pct">—</span><span class="kc-delta" id="d-vidas-delta">—</span></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kc-lbl">Meta Mensal de Vidas</div>
+      <div class="kc-val" id="d-vidas-meta-mes">6.000</div>
+      <div class="kc-meta" id="d-vidas-meta-sub">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kc-lbl">Total Acumulado no Mês</div>
+      <div class="kc-val" id="d-vidas-acum">—</div>
+      <div class="kc-meta" id="d-vidas-acum-sub">—</div>
+      <div class="kc-bar"><div class="kc-bar-f" id="d-vidas-acum-bar" style="width:0%;background:var(--a2)"></div></div>
+      <div class="kc-foot"><span class="kc-pct" id="d-vidas-acum-pct" style="color:var(--a2)">—</span><span class="kc-delta" id="d-vidas-acum-delta">—</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- BIG NUMBERS -->
+<div id="page-bignumbers" class="page">
+  <div class="ph"><div><div class="pt">📊 Big Numbers</div><div class="ps">silver_onfly_old_all_emissions · company_id=4609</div></div><span class="badge bg">✓ TR e Vidas acima da meta</span></div>
+  <div class="panel mb">
+    <div class="ptitle">💰 <span>GMV — Ano · Mês · Dia</span></div>
+    <div class="g3 mb">
+      <div class="card"><div class="k-lbl">GMV Ano 2026</div><div class="k-val xxl" id="card-gmv-ano">—</div><div class="k-sub">Meta anual: R$ 33,0M</div><div class="bar-bg"><div class="bar-f" id="bar-gmv-ano" style="width:0%;background:var(--amber)"></div></div><div class="k-foot"><span class="pct" id="pct-gmv-ano" style="color:var(--amber)">—</span><span class="fc" id="lbl-gmv-meses">—</span></div><div class="fcast"><div class="fcast-lbl">Forecast Anual</div><div class="fcast-val" id="fc-gmv-ano">—</div><div class="fcast-sub" id="fc-gmv-ano-sub">—</div></div></div>
+      <div class="card"><div class="k-lbl">GMV Mês Atual (acum.)</div><div class="k-val xxl" id="card-gmv-mes" style="color:var(--amber)">—</div><div class="k-sub" id="sub-gmv-mes">—</div><div class="bar-bg"><div class="bar-f" id="bar-gmv-mes" style="width:0%;background:var(--amber)"></div></div><div class="k-foot"><span class="pct" id="pct-gmv-mes" style="color:var(--amber)">—</span><span class="fc" id="fc-gmv-mes-sub">—</span></div><div class="fcast"><div class="fcast-lbl">Forecast Mês</div><div class="fcast-val" id="fc-gmv-mes">—</div><div class="fcast-sub" id="fc-gmv-mes-sub2">—</div></div></div>
+      <div class="card"><div class="k-lbl">GMV D-1</div><div class="k-val xxl" id="card-gmv-d1" style="color:var(--green)">—</div><div class="k-sub" id="sub-gmv-d1">—</div><div class="bar-bg"><div class="bar-f" id="bar-gmv-d1" style="width:0%;background:var(--green)"></div></div><div class="k-foot"><span class="pct" id="pct-gmv-d1" style="color:var(--green)">—</span><span class="fc" id="fc-gmv-d1">—</span></div></div>
+    </div>
+    <div style="position:relative;height:190px"><canvas id="c-gmv-dia"></canvas></div>
+  </div>
+  <div class="panel mb">
+    <div class="ptitle">👥 <span>Vidas Ativas</span></div>
+    <div class="g4 mb">
+      <div class="card"><div class="k-lbl">Total Histórico</div><div class="k-val xl" id="card-vidas-total">—</div><div class="k-sub">Meta: 92.000</div><div class="bar-bg"><div class="bar-f" style="width:100%;background:var(--green)"></div></div><div class="k-foot"><span class="pct" style="color:var(--green)">103,2% ✓</span></div></div>
+      <div class="card"><div class="k-lbl">Ativadas em 2026</div><div class="k-val xl" id="card-vidas-2026">—</div><div class="k-sub" id="sub-vidas-2026">—</div></div>
+      <div class="card"><div class="k-lbl">Ativadas no Mês</div><div class="k-val xl" id="card-vidas-mes" style="color:var(--amber)">—</div><div class="k-sub" id="sub-vidas-mes">—</div><div class="bar-bg"><div class="bar-f" id="bar-vidas-mes" style="width:0%;background:var(--amber)"></div></div><div class="k-foot"><span class="pct" id="pct-vidas-mes" style="color:var(--amber)">—</span><span class="fc" id="delta-vidas-mes">—</span></div></div>
+      <div class="card"><div class="k-lbl">Ativadas D-1</div><div class="k-val xl" id="card-vidas-d1" style="color:var(--green)">—</div><div class="k-sub" id="sub-vidas-d1">—</div></div>
+    </div>
+    <div style="position:relative;height:190px"><canvas id="c-vidas-dia"></canvas></div>
+  </div>
+  <div class="panel">
+    <div class="ptitle">📈 <span>Take Rate — Histórico Mensal 2026</span></div>
+    <div style="position:relative;height:220px;margin-bottom:18px"><canvas id="c-tr-bn"></canvas></div>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Mês</th><th class="tbl-r">GMV</th><th class="tbl-r">Profit</th><th class="tbl-r">TR%</th><th class="tbl-r">Status</th></tr></thead>
+        <tbody id="tbl-tr-bn-meses"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- METAS -->
+<div id="page-metas" class="page">
+  <div class="ph"><div><div class="pt">🎯 Metas & Histórico</div><div class="ps">Metas 2026 · Atingimento acumulado</div></div></div>
+  <div class="panel mb">
+    <div class="ptitle">💰 <span>GMV — Metas vs Realizado</span></div>
+    <div style="position:relative;height:210px;margin-bottom:14px"><canvas id="c-meta-gmv"></canvas></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:80px">Mês</th><th class="tbl-r">Meta</th><th class="tbl-r">Realizado</th><th class="tbl-r">Ating.</th><th class="tbl-r">Status</th></tr></thead><tbody id="tbl-meta-gmv"></tbody></table></div>
+  </div>
+  <div class="panel mb">
+    <div class="ptitle">👥 <span>Vidas Ativas — Metas vs Realizado</span></div>
+    <div style="position:relative;height:210px;margin-bottom:14px"><canvas id="c-meta-vidas"></canvas></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:80px">Mês</th><th class="tbl-r">Meta Acum.</th><th class="tbl-r">Real Acum.</th><th class="tbl-r">Novas</th><th class="tbl-r">Meta Novas</th><th class="tbl-r">Status</th></tr></thead><tbody id="tbl-meta-vidas"></tbody></table></div>
+  </div>
+  <div class="panel"><div class="ptitle">📈 <span>Take Rate — Metas vs Realizado</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:80px">Mês</th><th class="tbl-r">Meta TR</th><th class="tbl-r">TR Real</th><th class="tbl-r">Desvio</th><th class="tbl-r">Status</th></tr></thead><tbody id="tbl-meta-tr"></tbody></table></div></div>
+</div>
+
+<!-- HISTÓRICO -->
+<div id="page-historico" class="page">
+  <div class="ph"><div><div class="pt">📆 Histórico 2024–2025</div><div class="ps">silver_onfly_old_all_emissions + gold_user_status</div></div></div>
+  <div class="tab-bar">
+    <button class="tb active" onclick="stab('hist','gmv')">💰 GMV & TR</button>
+    <button class="tb" onclick="stab('hist','vidas')">👥 Vidas</button>
+    <button class="tb" onclick="stab('hist','tabela')">📋 Tabela Completa</button>
+  </div>
+  <div id="hist-gmv" class="tp active"><div class="g2 mb"><div class="panel" style="margin:0"><div class="ptitle">💰 <span>GMV Mensal 2024–2025</span></div><div style="position:relative;height:240px"><canvas id="c-hist-gmv"></canvas></div></div><div class="panel" style="margin:0"><div class="ptitle">📈 <span>Take Rate 2024–2025</span></div><div style="position:relative;height:240px"><canvas id="c-hist-tr"></canvas></div></div></div><div class="g3"><div class="card"><div class="k-lbl">GMV Total 2024</div><div class="k-val">R$ 4,16M</div></div><div class="card"><div class="k-lbl">GMV Total 2025</div><div class="k-val">R$ 21,07M</div></div><div class="card"><div class="k-lbl">TR Médio 2025</div><div class="k-val" style="color:var(--amber)">3,24%</div></div></div></div>
+  <div id="hist-vidas" class="tp"><div class="panel"><div class="ptitle">👥 <span>Novas Vidas 2024–2025</span></div><div style="position:relative;height:280px"><canvas id="c-hist-vidas"></canvas></div></div><div class="g3"><div class="card"><div class="k-lbl">Ativações 2024</div><div class="k-val">14.812</div></div><div class="card"><div class="k-lbl">Ativações 2025</div><div class="k-val">61.832</div></div><div class="card"><div class="k-lbl">Ativações 2026 (parcial)</div><div class="k-val" id="hist-vidas-2026">—</div></div></div></div>
+  <div id="hist-tabela" class="tp"><div class="panel"><div class="ptitle">📋 <span>Tabela Completa com MoM</span></div><div style="font-size:11px;color:var(--muted);margin-bottom:10px">▲▼ MoM = variação em relação ao mês anterior</div><div class="sy tbl-wrap"><table class="tbl"><thead><tr><th style="width:50px">Ano</th><th style="width:70px">Mês</th><th class="tbl-r">GMV</th><th class="tbl-r">MoM</th><th class="tbl-r">Profit</th><th class="tbl-r">TR</th><th class="tbl-r">MoM TR</th><th class="tbl-r">Emissões</th><th class="tbl-r">Novas Vidas</th><th class="tbl-r">MoM Vidas</th></tr></thead><tbody id="tbl-hist"></tbody></table></div></div></div>
+</div>
+
+<!-- YoY -->
+<div id="page-yoy" class="page">
+  <div class="ph"><div><div class="pt">📉 Análise YoY</div><div class="ps">Comparativo Ano a Ano · 2024 vs 2025 vs 2026</div></div></div>
+  <div class="yoy-grid" id="yoy-cards"></div>
+  <div class="g2 mb"><div class="panel" style="margin:0"><div class="ptitle">💰 <span>GMV YoY por Mês</span></div><div style="position:relative;height:260px"><canvas id="c-yoy-gmv"></canvas></div></div><div class="panel" style="margin:0"><div class="ptitle">📈 <span>Take Rate YoY</span></div><div style="position:relative;height:260px"><canvas id="c-yoy-tr"></canvas></div></div></div>
+  <div class="panel mb"><div class="ptitle">👥 <span>Vidas Ativas YoY</span></div><div style="position:relative;height:220px"><canvas id="c-yoy-vidas"></canvas></div></div>
+  <div class="panel"><div class="ptitle">📋 <span>Tabela YoY</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th class="tbl-r">GMV 2024</th><th class="tbl-r">GMV 2025</th><th class="tbl-r">YoY</th><th class="tbl-r">GMV 2026</th><th class="tbl-r">YoY</th><th class="tbl-r">TR 24</th><th class="tbl-r">TR 25</th><th class="tbl-r">TR 26</th><th class="tbl-r">Vidas 25</th><th class="tbl-r">Vidas 26</th></tr></thead><tbody id="tbl-yoy"></tbody></table></div></div>
+</div>
+
+<!-- VIDAS -->
+<div id="page-vidas" class="page">
+  <div class="ph"><div><div class="pt">👥 Vidas Ativas</div><div class="ps">gold_user_status</div></div><span class="badge bg">✓ Meta superada</span></div>
+  <div class="g3 mb">
+    <div class="card"><div class="k-lbl">Total Ativas</div><div class="k-val" style="color:var(--green)" id="vidas2-total">—</div><div class="k-sub">Meta: 92.000</div><div class="bar-bg"><div class="bar-f" style="width:100%;background:var(--green)"></div></div></div>
+    <div class="card"><div class="k-lbl">Ativadas Mês</div><div class="k-val" id="vidas2-mes">—</div><div class="k-sub" id="sub-vidas2-mes">—</div><div class="bar-bg"><div class="bar-f" id="bar-vidas2-mes" style="width:0%;background:var(--amber)"></div></div></div>
+    <div class="card"><div class="k-lbl">D-1</div><div class="k-val" id="vidas2-d1">—</div><div class="k-sub" id="sub-vidas2-pico">—</div></div>
+  </div>
+  <div class="panel"><div class="ptitle">📅 <span>Ativações Diárias — Mês Atual</span></div><div style="position:relative;height:250px"><canvas id="c-vidas-mar"></canvas></div></div>
+  <div class="panel"><div class="ptitle">🔍 <span>Insights</span></div>
+    <div class="alert a-ok"><div>🚀</div><div><strong>Pico mês:</strong> <span id="insight-pico">—</span></div></div>
+    <div class="alert a-warn"><div>⚠️</div><div><strong id="insight-warn-title">—</strong> <span id="insight-warn-body">—</span></div></div>
+  </div>
+</div>
+
+<!-- TAKE RATE -->
+<div id="page-takerate" class="page">
+  <div class="ph"><div><div class="pt">📈 Take Rate</div><div class="ps">silver_onfly_old_all_emissions · company_id=4609</div></div><span class="badge bg">✓ Acima da meta</span></div>
+  <div class="g4 mb">
+    <div class="card"><div class="k-lbl">TR Ano 2026</div><div class="k-val" style="color:var(--green)" id="tr-ano">—</div><div class="k-sub" id="sub-tr-ano">—</div></div>
+    <div class="card"><div class="k-lbl">TR Aéreo (Mês)</div><div class="k-val" style="color:var(--red)">7,02%</div><div class="k-sub">GMV R$1,15M · 630 emis.</div></div>
+    <div class="card"><div class="k-lbl">TR Hotel (Mês)</div><div class="k-val" style="color:var(--green)">11,13%</div><div class="k-sub">GMV R$877k · 742 emis.</div></div>
+    <div class="card"><div class="k-lbl">TR Bus (Mês)</div><div class="k-val" style="color:var(--green)">17,75%</div></div>
+  </div>
+  <div class="g2 mb">
+    <div class="panel" style="margin:0"><div class="ptitle">📈 <span>TR Mensal 2026</span></div><div style="position:relative;height:210px"><canvas id="c-tr-mensal"></canvas></div></div>
+    <div class="panel" style="margin:0"><div class="ptitle">📊 <span>TR Diário Total — Mês Atual</span></div><div style="position:relative;height:210px"><canvas id="c-tr-diario"></canvas></div></div>
+  </div>
+  <div class="g2 mb">
+    <div class="panel" style="margin:0"><div class="ptitle">✈️ <span>TR Diário Aéreo — Meta 7%</span></div><div style="position:relative;height:200px"><canvas id="c-tr-aereo-diario"></canvas></div></div>
+    <div class="panel" style="margin:0"><div class="ptitle">🏨 <span>TR Diário Hotel — Meta 11%</span></div><div style="position:relative;height:200px"><canvas id="c-tr-hotel-diario"></canvas></div></div>
+  </div>
+  <div class="panel mb"><div class="ptitle">🚌 <span>TR Diário Ônibus — Meta 15%</span></div><div style="position:relative;height:180px"><canvas id="c-tr-bus-diario"></canvas></div></div>
+  <div class="panel"><div class="ptitle">📋 <span>Segmentos — Mês Atual</span></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Segmento</th><th class="tbl-r">GMV Mês</th><th class="tbl-r">GMV D-1</th><th class="tbl-r">Emis. Mês</th><th class="tbl-r">Emis. D-1</th><th class="tbl-r">TR Mês</th><th class="tbl-r">TR D-1</th></tr></thead><tbody id="tbl-seg-tr"></tbody></table></div>
+  </div>
+</div>
+
+<!-- TR AÉREO -->
+<div id="page-tr-aereo" class="page">
+  <div class="ph"><div><div class="pt">✈️ Aéreo — Take Rate</div><div class="ps">Consolidadores · Mês Atual</div></div><span class="badge br">TR 7,02% — Abaixo da meta</span></div>
+  <div class="g4 mb">
+    <div class="card"><div class="k-lbl">TR Aéreo Mês</div><div class="k-val" style="color:var(--red)">7,02%</div></div>
+    <div class="card"><div class="k-lbl">GMV Aéreo</div><div class="k-val">R$ 1,15M</div><div class="k-sub">54,9% do total</div></div>
+    <div class="card"><div class="k-lbl">Emissões</div><div class="k-val">630</div></div>
+    <div class="card"><div class="k-lbl">Ticket Médio</div><div class="k-val">R$ 1.821</div></div>
+  </div>
+  <div class="panel"><div class="ptitle">📊 <span>TR por Consolidador</span></div><div style="position:relative;height:280px;margin-bottom:14px"><canvas id="c-consol"></canvas></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Consolidador</th><th class="tbl-r">Emissões</th><th class="tbl-r">GMV</th><th class="tbl-r">Profit</th><th class="tbl-r">TR</th><th class="tbl-r">Ticket</th></tr></thead><tbody id="tbl-consol"></tbody></table></div>
+  </div>
+</div>
+
+<!-- TR HOTEL -->
+<div id="page-tr-hotel" class="page">
+  <div class="ph"><div><div class="pt">🏨 Hotel — Take Rate</div><div class="ps">Destinos e Fornecedores · Mês Atual</div></div><span class="badge bg">TR 11,13% ✓</span></div>
+  <div class="g4 mb">
+    <div class="card"><div class="k-lbl">TR Hotel Mês</div><div class="k-val" style="color:var(--green)">11,13%</div></div>
+    <div class="card"><div class="k-lbl">GMV Hotel</div><div class="k-val">R$ 877k</div></div>
+    <div class="card"><div class="k-lbl">Emissões</div><div class="k-val">742</div></div>
+    <div class="card"><div class="k-lbl">Ticket Médio</div><div class="k-val">R$ 1.182</div></div>
+  </div>
+  <div class="tab-bar">
+    <button class="tb active" onclick="stab('hotel','destinos')">📍 Destinos</button>
+    <button class="tb" onclick="stab('hotel','fornec')">🏨 Fornecedores</button>
+  </div>
+  <div id="hotel-destinos" class="tp active"><div class="panel"><div class="ptitle">📍 <span>Top 10 Destinos</span></div><div style="position:relative;height:260px;margin-bottom:14px"><canvas id="c-hotel-dest"></canvas></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Destino</th><th class="tbl-r">Emissões</th><th class="tbl-r">GMV</th><th class="tbl-r">TR</th><th class="tbl-r">Ticket</th></tr></thead><tbody id="tbl-hotel-dest"></tbody></table></div></div></div>
+  <div id="hotel-fornec" class="tp"><div class="panel"><div class="ptitle">🏨 <span>Top 10 Fornecedores</span></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Fornecedor</th><th>Cidade</th><th class="tbl-r">Emis.</th><th class="tbl-r">GMV</th><th class="tbl-r">TR</th><th class="tbl-r">Ticket</th></tr></thead><tbody id="tbl-hotel-fornec"></tbody></table></div></div></div>
+</div>
+
+<!-- OFERTAS EXCLUSIVAS -->
+<div id="page-tr-excl" class="page">
+  <div class="ph"><div><div class="pt">⭐ Ofertas Exclusivas</div><div class="ps">consolidator = ONHAPPY · Histórico completo</div></div></div>
+  <div class="g4 mb">
+    <div class="card"><div class="k-lbl">Emissões Totais</div><div class="k-val xxl" style="color:var(--accent)">128</div><div class="k-sub">Histórico completo</div></div>
+    <div class="card"><div class="k-lbl">GMV Total Histórico</div><div class="k-val xxl">R$ 101,4k</div></div>
+    <div class="card"><div class="k-lbl">Emissões 2026</div><div class="k-val xxl" style="color:var(--a2)">13</div><div class="k-sub">Mar/26 · Ville Real + China Park</div></div>
+    <div class="card"><div class="k-lbl">GMV 2026</div><div class="k-val xxl" style="color:var(--a2)">R$ 16,5k</div></div>
+  </div>
+  <div class="tab-bar">
+    <button class="tb active" onclick="stab('excl','top10')">🏆 Top 10 Ofertas</button>
+    <button class="tb" onclick="stab('excl','mensal')">📆 Histórico Mensal</button>
+    <button class="tb" onclick="stab('excl','detalhe')">📋 Detalhe Completo</button>
+  </div>
+  <div id="excl-top10" class="tp active">
+    <div class="panel mb">
+      <div class="ptitle">🏆 <span>Top 10 Ofertas Mais Compradas — Histórico</span></div>
+      <div style="position:relative;height:260px;margin-bottom:16px"><canvas id="c-excl-top10"></canvas></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:30px">#</th><th>Hotel / Oferta</th><th style="width:130px">Cidade</th><th class="tbl-r" style="width:60px">Emis.</th><th class="tbl-r" style="width:90px">GMV Total</th><th class="tbl-r" style="width:70px">TR</th><th class="tbl-r" style="width:90px">Ticket Médio</th></tr></thead><tbody id="tbl-excl-top10"></tbody></table></div>
+    </div>
+  </div>
+  <div id="excl-mensal" class="tp">
+    <div class="panel mb">
+      <div class="ptitle">📆 <span>Emissões e GMV por Mês</span></div>
+      <div style="position:relative;height:240px;margin-bottom:16px"><canvas id="c-excl-mensal"></canvas></div>
+      <div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:70px">Mês</th><th class="tbl-r">Emissões</th><th class="tbl-r">GMV</th><th class="tbl-r">Profit</th><th class="tbl-r">TR</th><th class="tbl-r">Ticket Médio</th><th class="tbl-r">Hotéis Únicos</th></tr></thead><tbody id="tbl-excl-mensal"></tbody></table></div>
+    </div>
+  </div>
+  <div id="excl-detalhe" class="tp">
+    <div class="panel">
+      <div class="ptitle">📋 <span>Detalhe Completo por Hotel e Mês</span></div>
+      <div class="sy tbl-wrap"><table class="tbl"><thead><tr><th style="width:60px">Mês</th><th>Hotel / Oferta</th><th style="width:130px">Cidade</th><th class="tbl-r" style="width:50px">Emis.</th><th class="tbl-r" style="width:80px">GMV</th><th class="tbl-r" style="width:80px">Profit</th><th class="tbl-r" style="width:60px">TR</th><th class="tbl-r" style="width:80px">Ticket</th></tr></thead><tbody id="tbl-excl-detalhe"></tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- CUPONS -->
+<div id="page-cupons" class="page">
+  <div class="ph"><div><div class="pt">🎫 Cupons & Saldos</div><div class="ps">silver_onhappy_coupons_vw · gold_onhappy_transactions</div></div><span class="badge ba">! Saldo Premiação elevado</span></div>
+  <div class="g4 mb">
+    <div class="card"><div class="k-lbl">Utilizado D-1</div><div class="k-val" id="cup-d1-val">—</div><div class="k-sub" id="cup-d1-sub">—</div></div>
+    <div class="card"><div class="k-lbl">Utilizado Mês Vigente</div><div class="k-val" id="cup-mes-val">—</div><div class="k-sub" id="cup-mes-sub">—</div></div>
+    <div class="card"><div class="k-lbl">Utilizado 2026</div><div class="k-val" id="cup-ano-val">—</div><div class="k-sub" id="cup-ano-sub">—</div></div>
+    <div class="card"><div class="k-lbl">Saldo Prem. Aberto</div><div class="k-val" style="color:var(--amber)">R$ 762.713</div><div class="k-sub">434 cupons</div></div>
+  </div>
+  <div class="tab-bar">
+    <button class="tb active" onclick="stab('cupons','ontem')">📅 Ontem vs Ano</button>
+    <button class="tb" onclick="stab('cupons','mensal')">📆 Mensal</button>
+    <button class="tb" onclick="stab('cupons','share')">📐 % do GMV</button>
+    <button class="tb" onclick="stab('cupons','aberto')">💰 Saldo em Aberto</button>
+  </div>
+  <div id="cupons-ontem" class="tp active">
+    <div class="panel mb">
+      <div class="ptitle">📊 <span>Share MKT vs Premiação — D-1 · Mês · Ano</span></div>
+      <div style="position:relative;height:200px;margin-bottom:14px"><canvas id="c-cup-share-periodo"></canvas></div>
+      <div class="g3">
+        <div class="card" style="padding:12px"><div class="k-lbl">D-1 — Share</div><div style="font-size:12px;margin-top:6px;line-height:2"><div style="display:flex;justify-content:space-between"><span style="color:var(--accent)">🟣 MKT:</span><span id="share-d1-mkt">—</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--amber)">🟡 Premiação:</span><span id="share-d1-prem">—</span></div><div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--faint);margin-top:4px;padding-top:4px"><span>Total:</span><span id="share-d1-tot">—</span></div></div></div>
+        <div class="card" style="padding:12px"><div class="k-lbl">Mês Vigente — Share</div><div style="font-size:12px;margin-top:6px;line-height:2"><div style="display:flex;justify-content:space-between"><span style="color:var(--accent)">🟣 MKT:</span><span id="share-mes-mkt">—</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--amber)">🟡 Premiação:</span><span id="share-mes-prem">—</span></div><div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--faint);margin-top:4px;padding-top:4px"><span>Total:</span><span id="share-mes-tot">—</span></div></div></div>
+        <div class="card" style="padding:12px"><div class="k-lbl">Ano 2026 — Share</div><div style="font-size:12px;margin-top:6px;line-height:2"><div style="display:flex;justify-content:space-between"><span style="color:var(--accent)">🟣 MKT:</span><span id="share-ano-mkt">—</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--amber)">🟡 Premiação:</span><span id="share-ano-prem">—</span></div><div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid var(--faint);margin-top:4px;padding-top:4px"><span>Total:</span><span id="share-ano-tot">—</span></div></div></div>
+      </div>
+    </div>
+    <div class="g2 mb">
+      <div class="panel" style="margin:0"><div class="ptitle">📅 <span>D-1 por Tipo</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Payer</th><th>Tipo</th><th class="tbl-r">Qtd</th><th class="tbl-r">Valor D-1</th></tr></thead><tbody id="tbl-cup-ontem"></tbody></table></div></div>
+      <div class="panel" style="margin:0"><div class="ptitle">📆 <span>Acumulado 2026 por Tipo</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Payer</th><th>Tipo</th><th class="tbl-r">Qtd Ano</th><th class="tbl-r">Valor Ano</th></tr></thead><tbody id="tbl-cup-ano"></tbody></table></div></div>
+    </div>
+    <div style="position:relative;height:200px"><canvas id="c-cup-compare"></canvas></div>
+  </div>
+  <div id="cupons-mensal" class="tp"><div class="panel"><div class="ptitle">📆 <span>Evolução Mensal 2026</span></div><div style="position:relative;height:240px;margin-bottom:14px"><canvas id="c-cup-mensal"></canvas></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th class="tbl-r">MKT (Onhappy)</th><th class="tbl-r">Premiação (Empresa)</th><th class="tbl-r">Total</th></tr></thead><tbody id="tbl-cup-mensal-body"></tbody></table></div></div></div>
+  <div id="cupons-share" class="tp"><div class="panel"><div class="ptitle">📐 <span>Cupons como % do GMV</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th class="tbl-r">GMV</th><th class="tbl-r">MKT</th><th class="tbl-r">%</th><th class="tbl-r">Premiação</th><th class="tbl-r">%</th><th class="tbl-r">Total %</th></tr></thead><tbody><tr><td>Jan/26</td><td class="tbl-r">R$ 2,47M</td><td class="tbl-r">R$ 259k</td><td class="tbl-r"><span class="trb" style="background:rgba(192,123,0,.12);color:var(--amber)">10,5%</span></td><td class="tbl-r">R$ 534k</td><td class="tbl-r"><span class="trb" style="background:rgba(229,62,62,.12);color:var(--red)">21,6%</span></td><td class="tbl-r"><strong>32,1%</strong></td></tr><tr><td>Fev/26</td><td class="tbl-r">R$ 1,66M</td><td class="tbl-r">R$ 359k</td><td class="tbl-r"><span class="trb" style="background:rgba(192,123,0,.12);color:var(--amber)">21,6%</span></td><td class="tbl-r">R$ 288k</td><td class="tbl-r"><span class="trb" style="background:rgba(229,62,62,.12);color:var(--red)">17,3%</span></td><td class="tbl-r"><strong>38,9%</strong></td></tr><tr><td>Mar/26</td><td class="tbl-r">R$ 2,09M</td><td class="tbl-r">R$ 249k</td><td class="tbl-r"><span class="trb" style="background:rgba(192,123,0,.12);color:var(--amber)">11,9%</span></td><td class="tbl-r">R$ 317k</td><td class="tbl-r"><span class="trb" style="background:rgba(229,62,62,.12);color:var(--red)">15,2%</span></td><td class="tbl-r"><strong>27,1%</strong></td></tr><tr><td>Abr/26 (parcial)</td><td class="tbl-r">R$ 355k</td><td class="tbl-r">R$ 81k</td><td class="tbl-r"><span class="trb" style="background:rgba(192,123,0,.12);color:var(--amber)">22,8%</span></td><td class="tbl-r">R$ 57k</td><td class="tbl-r"><span class="trb" style="background:rgba(229,62,62,.12);color:var(--red)">16,1%</span></td><td class="tbl-r"><strong>38,9%</strong></td></tr><tr class="tbl-tot"><td>2026</td><td class="tbl-r">R$ 5,93M</td><td class="tbl-r">R$ 948k</td><td class="tbl-r">16,0%</td><td class="tbl-r">R$ 1,19M</td><td class="tbl-r">20,1%</td><td class="tbl-r"><strong>36,1%</strong></td></tr></tbody></table></div><div class="alert a-warn" style="margin-top:14px"><div>⚠️</div><div><strong>Cupons ≈ 36% do GMV no ano.</strong></div></div></div></div>
+  <div id="cupons-aberto" class="tp"><div class="g2 mb"><div class="card"><div class="k-lbl">Cupons Ativos</div><div class="k-val" style="color:var(--amber)">434</div></div><div class="card"><div class="k-lbl">Valor Total em Aberto</div><div class="k-val" style="color:var(--amber)">R$ 762.713</div></div></div><div class="panel"><div class="ptitle">🏢 <span>Top 10 Empresas — Saldo em Aberto</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>#</th><th>Empresa</th><th class="tbl-r">Cupons</th><th class="tbl-r">Saldo</th><th class="tbl-r">Ticket Médio</th></tr></thead><tbody id="tbl-saldo-emp"></tbody></table></div></div><div class="alert a-warn"><div>⚠️</div><div><strong>Top 3 concentram 41% do saldo.</strong></div></div></div>
+</div>
+
+<!-- COMPRAS & COBERTURA -->
+<div id="page-compras" class="page">
+  <div class="ph"><div><div class="pt">🧳 Compras & Cobertura</div><div class="ps">silver_onfly_old_all_emissions · company_id=4609</div></div></div>
+  <div class="g4 mb">
+    <div class="card"><div class="k-lbl">Emissões 2026</div><div class="k-val" id="comp-emis-ano">—</div></div>
+    <div class="card"><div class="k-lbl">Emissões Mês Vigente</div><div class="k-val" id="comp-emis-mes" style="color:var(--amber)">—</div><div class="k-sub" id="comp-emis-mes-sub">—</div></div>
+    <div class="card"><div class="k-lbl">Emissões D-1</div><div class="k-val" id="comp-emis-d1">—</div></div>
+    <div class="card"><div class="k-lbl">Ticket Médio Mês</div><div class="k-val" id="comp-tm-mes">—</div></div>
+  </div>
+  <div class="g2 mb">
+    <div class="panel" style="margin:0"><div class="ptitle">📊 <span>Share Emissões — Mês Vigente</span></div><div style="position:relative;height:200px"><canvas id="c-share-emis"></canvas></div></div>
+    <div class="panel" style="margin:0"><div class="ptitle">💰 <span>Share GMV — Mês Vigente</span></div><div style="position:relative;height:200px"><canvas id="c-share-gmv"></canvas></div></div>
+  </div>
+  <div class="panel mb">
+    <div class="ptitle">📅 <span>Histórico Mensal de Emissões 2026</span></div>
+    <div style="position:relative;height:200px;margin-bottom:14px"><canvas id="c-emis-hist"></canvas></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th class="tbl-r">Voos</th><th class="tbl-r">Hotel</th><th class="tbl-r">Total</th><th class="tbl-r">GMV</th><th class="tbl-r">Ticket Médio</th></tr></thead><tbody id="tbl-emis-hist"></tbody></table></div>
+  </div>
+  <div class="panel mb">
+    <div class="ptitle">🎯 <span>Cobertura — Emissões / Vidas Ativas Acumuladas</span></div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:12px">Cobertura = emissões do mês ÷ vidas ativas acumuladas ao final do mês</div>
+    <div style="position:relative;height:220px;margin-bottom:14px"><canvas id="c-cobertura"></canvas></div>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Mês</th><th class="tbl-r">Emissões</th><th class="tbl-r">Vidas Acum.</th><th class="tbl-r">Cobertura</th><th class="tbl-r">Variação</th></tr></thead><tbody id="tbl-cobertura"></tbody></table></div>
+  </div>
+</div>
+
+</main>
+<script>
+// ══ CONFIG ══
+const WEBAPP_URL='https://script.google.com/a/macros/onfly.com.br/s/AKfycbwVmCCoAynUnsp14dzd9XZ0znpla2Guj7-qS0ttLA6nWM32gMuFpGinUMWM2G8N_0cv/exec';
+const META_TM=1100,META_VIDAS_MES=6000;
+const fBRL=v=>v>=1e6?"R$ "+(v/1e6).toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})+"M":v>=1e3?"R$ "+(v/1e3).toLocaleString("pt-BR",{minimumFractionDigits:1,maximumFractionDigits:1})+"k":"R$ "+v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+const f2=v=>v?.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2})??"—";
+const trC=v=>v>=8?"var(--green)":v<0?"var(--accent)":"var(--red)";
+const trBg=v=>v>=8?"rgba(15,155,110,.12)":v<0?"rgba(91,75,245,.12)":"rgba(229,62,62,.12)";
+const trBadge=v=>`<span class="trb" style="color:${trC(v)};background:${trBg(v)}">${f2(v)}%</span>`;
+const trBadgeCustom=(v,meta)=>{const ok=v>=meta;const c=ok?"var(--green)":"var(--red)";const bg=ok?"rgba(15,155,110,.12)":"rgba(229,62,62,.12)";return`<span class="trb" style="color:${c};background:${bg}">${f2(v)}%</span>`;};
+const metaVidasNovas=m=>(m==='Jan/26'||m==='Fev/26')?3000:6000;
+const diasNoMes=lab=>{const mp={Jan:1,Fev:2,Mar:3,Abr:4,Mai:5,Jun:6,Jul:7,Ago:8,Set:9,Out:10,Nov:11,Dez:12};const p=lab.split('/');return new Date(2000+parseInt(p[1]),mp[p[0]],0).getDate();};
+function getOntemISO(){const h=new Date(),o=new Date(h);o.setDate(h.getDate()-1);return o.toISOString().split('T')[0];}
+function formatDia(iso){const p=String(iso).split('-');return p.length>=3?p[2]+'/'+p[1]:iso;}
+function getMesISO(iso){return iso.substring(0,7);}
+
+// ══ DADOS ESTÁTICOS (fallback) ══
+let gmvDia=[
+  {d:"01/04",mISO:"2026-04",f:30000,h:26631.61,b:0,pf:2600,ph:2305.06,pb:0,ef:12,eh:20,eb:0},
+  {d:"02/04",mISO:"2026-04",f:25000,h:21879.92,b:0,pf:2340,ph:2057.61,pb:0,ef:10,eh:24,eb:0},
+  {d:"03/04",mISO:"2026-04",f:38000,h:27670.67,b:0,pf:3920,ph:2867.43,pb:0,ef:15,eh:24,eb:0},
+  {d:"04/04",mISO:"2026-04",f:28000,h:24096.38,b:0,pf:2310,ph:1992.41,pb:0,ef:11,eh:20,eb:0},
+  {d:"05/04",mISO:"2026-04",f:35000,h:27310.16,b:0,pf:4165,ph:3248.83,pb:0,ef:16,eh:21,eb:0},
+  {d:"06/04",mISO:"2026-04",f:42000,h:29659.02,b:0,pf:3570,ph:2528.81,pb:0,ef:19,eh:25,eb:0},
+];
+let vidasDia=[
+  {d:"01/04",mISO:"2026-04",v:103},{d:"02/04",mISO:"2026-04",v:89},
+  {d:"03/04",mISO:"2026-04",v:212},{d:"04/04",mISO:"2026-04",v:145},
+  {d:"05/04",mISO:"2026-04",v:178},{d:"06/04",mISO:"2026-04",v:95},
+];
+let realMensal=[
+  {m:"Jan/26",gmv:2471852,profit:201509,tr:8.15,emissoes:1752,vidas_acum:87680,vidas_novas:5679},
+  {m:"Fev/26",gmv:1663696,profit:136704,tr:8.22,emissoes:1274,vidas_acum:92773,vidas_novas:5093},
+  {m:"Mar/26",gmv:2089719,profit:184320,tr:8.82,emissoes:1385,vidas_acum:94943,vidas_novas:7721},
+  {m:"Abr/26",gmv:355247,profit:33905,tr:9.54,emissoes:267,vidas_acum:0,vidas_novas:822},
+];
+let profDia=gmvDia.map(r=>({d:r.d,mISO:r.mISO,p:r.pf+r.ph+r.pb}));
+let trDia=gmvDia.map(r=>{const tot=r.f+r.h+r.b,prof=r.pf+r.ph+r.pb;return{d:r.d,mISO:r.mISO,gmv:tot,tr:tot>0?+((prof/tot)*100).toFixed(2):0,trf:r.f>0?+((r.pf/r.f)*100).toFixed(2):0,trh:r.h>0?+((r.ph/r.h)*100).toFixed(2):0,trb:r.b>0?+((r.pb/r.b)*100).toFixed(2):0,f:r.f,h:r.h,b:r.b,pf:r.pf,ph:r.ph,pb:r.pb,ef:r.ef,eh:r.eh,eb:r.eb};});
+const metasAnuais=[
+  {m:"Jan/26",gm:1600000,vm:83000},{m:"Fev/26",gm:1600000,vm:86000},{m:"Mar/26",gm:2300000,vm:92000},
+  {m:"Abr/26",gm:2300000,vm:98000},{m:"Mai/26",gm:2500000,vm:104000},{m:"Jun/26",gm:2300000,vm:110000},
+  {m:"Jul/26",gm:2800000,vm:116000},{m:"Ago/26",gm:3200000,vm:122000},{m:"Set/26",gm:3500000,vm:128000},
+  {m:"Out/26",gm:3700000,vm:132000},{m:"Nov/26",gm:4000000,vm:138000},{m:"Dez/26",gm:2200000,vm:144000},
+];
+const hist2024=[
+  {m:"Jan/24",gmv:35098,profit:1176,tr:3.35,emissoes:51,vidas:0},{m:"Fev/24",gmv:19734,profit:335,tr:1.70,emissoes:28,vidas:0},
+  {m:"Mar/24",gmv:35727,profit:1846,tr:5.17,emissoes:29,vidas:0},{m:"Abr/24",gmv:55519,profit:3405,tr:6.13,emissoes:46,vidas:179},
+  {m:"Mai/24",gmv:74912,profit:-11244,tr:-15.01,emissoes:78,vidas:393},{m:"Jun/24",gmv:114248,profit:7465,tr:6.53,emissoes:111,vidas:565},
+  {m:"Jul/24",gmv:268890,profit:13235,tr:4.92,emissoes:300,vidas:969},{m:"Ago/24",gmv:361212,profit:8586,tr:2.38,emissoes:426,vidas:2936},
+  {m:"Set/24",gmv:538807,profit:5214,tr:0.97,emissoes:468,vidas:2942},{m:"Out/24",gmv:648203,profit:13678,tr:2.11,emissoes:613,vidas:2392},
+  {m:"Nov/24",gmv:1098736,profit:29507,tr:2.69,emissoes:844,vidas:2672},{m:"Dez/24",gmv:904322,profit:3834,tr:0.42,emissoes:727,vidas:1764},
+];
+const hist2025=[
+  {m:"Jan/25",gmv:843460,profit:3251,tr:0.39,emissoes:692,vidas:2041},{m:"Fev/25",gmv:796961,profit:-7912,tr:-0.99,emissoes:602,vidas:2237},
+  {m:"Mar/25",gmv:1108146,profit:5283,tr:0.48,emissoes:771,vidas:2435},{m:"Abr/25",gmv:1078323,profit:39078,tr:3.62,emissoes:880,vidas:5826},
+  {m:"Mai/25",gmv:1591273,profit:49083,tr:3.08,emissoes:1185,vidas:3297},{m:"Jun/25",gmv:1646927,profit:43785,tr:2.66,emissoes:1149,vidas:5229},
+  {m:"Jul/25",gmv:2173975,profit:45024,tr:2.07,emissoes:1369,vidas:5907},{m:"Ago/25",gmv:1931649,profit:42561,tr:2.20,emissoes:1595,vidas:5934},
+  {m:"Set/25",gmv:1852055,profit:76239,tr:4.12,emissoes:1495,vidas:6383},{m:"Out/25",gmv:2273012,profit:86445,tr:3.80,emissoes:1749,vidas:8257},
+  {m:"Nov/25",gmv:3569785,profit:157893,tr:4.42,emissoes:2248,vidas:7123},{m:"Dez/25",gmv:2201158,profit:153393,tr:6.97,emissoes:1466,vidas:7163},
+];
+const emisSegMensal={"Jan/26":{f:803,h:747,b:0},"Fev/26":{f:572,h:586,b:0},"Mar/26":{f:641,h:721,b:13},"Abr/26":{f:108,h:159,b:0}};
+const coberturaData=[
+  {m:"Mar/24",label:"Mar/24",emis:29,vidasAcum:2936,ano:2024},{m:"Abr/24",label:"Abr/24",emis:46,vidasAcum:5872,ano:2024},
+  {m:"Mai/24",label:"Mai/24",emis:78,vidasAcum:6265,ano:2024},{m:"Jun/24",label:"Jun/24",emis:111,vidasAcum:6830,ano:2024},
+  {m:"Jul/24",label:"Jul/24",emis:300,vidasAcum:7799,ano:2024},{m:"Ago/24",label:"Ago/24",emis:426,vidasAcum:10735,ano:2024},
+  {m:"Set/24",label:"Set/24",emis:468,vidasAcum:13677,ano:2024},{m:"Out/24",label:"Out/24",emis:613,vidasAcum:16069,ano:2024},
+  {m:"Nov/24",label:"Nov/24",emis:844,vidasAcum:18741,ano:2024},{m:"Dez/24",label:"Dez/24",emis:727,vidasAcum:20505,ano:2024},
+  {m:"Jan/25",label:"Jan/25",emis:692,vidasAcum:22546,ano:2025},{m:"Fev/25",label:"Fev/25",emis:602,vidasAcum:24783,ano:2025},
+  {m:"Mar/25",label:"Mar/25",emis:771,vidasAcum:27218,ano:2025},{m:"Abr/25",label:"Abr/25",emis:880,vidasAcum:33044,ano:2025},
+  {m:"Mai/25",label:"Mai/25",emis:1185,vidasAcum:36341,ano:2025},{m:"Jun/25",label:"Jun/25",emis:1149,vidasAcum:41570,ano:2025},
+  {m:"Jul/25",label:"Jul/25",emis:1369,vidasAcum:47477,ano:2025},{m:"Ago/25",label:"Ago/25",emis:1595,vidasAcum:53411,ano:2025},
+  {m:"Set/25",label:"Set/25",emis:1495,vidasAcum:59794,ano:2025},{m:"Out/25",label:"Out/25",emis:1749,vidasAcum:68051,ano:2025},
+  {m:"Nov/25",label:"Nov/25",emis:2248,vidasAcum:75174,ano:2025},{m:"Dez/25",label:"Dez/25",emis:1466,vidasAcum:82337,ano:2025},
+  {m:"Jan/26",label:"Jan/26",emis:1550,vidasAcum:87680,ano:2026},{m:"Fev/26",label:"Fev/26",emis:1158,vidasAcum:92773,ano:2026},
+  {m:"Mar/26",label:"Mar/26",emis:1362,vidasAcum:94943,ano:2026},{m:"Abr/26",label:"Abr/26 (parcial)",emis:267,vidasAcum:95765,ano:2026},
+];
+let cupMensal=[{m:"Jan/26",mkt:259440,prem:534275,tot:793715},{m:"Fev/26",mkt:358666,prem:287677,tot:646343},{m:"Mar/26",mkt:248545,prem:316812,tot:565357},{m:"Abr/26",mkt:80652,prem:57278,tot:137930}];
+let cupD1={mkt:10100.10,prem:10739.38,tot:20839.48,qmkt:60,qprem:2,qtot:62};
+let cupMesVig={mkt:80652,prem:57278,tot:137930,qmkt:221,qprem:17,qtot:238};
+let cupAno={mkt:947303,prem:1195042,tot:2142345,qmkt:4493,qprem:470,qtot:4963};
+let consolData=[
+  {n:"FLIGHT",e:139,gmv:157039,profit:12203,tr:7.77,tk:1130},{n:"FLYTOURLAG3",e:111,gmv:234869,profit:16384,tr:6.98,tk:2116},
+  {n:"AZUL",e:107,gmv:139449,profit:9274,tr:6.65,tk:1303},{n:"IATA-AZL-LAT-BTC",e:63,gmv:116917,profit:7452,tr:6.37,tk:1856},
+  {n:"IATAAZULLATAM",e:55,gmv:131964,profit:10796,tr:8.18,tk:2399},{n:"REXTUR",e:55,gmv:113412,profit:10203,tr:9.00,tk:2062},
+  {n:"LATAM",e:52,gmv:115780,profit:8739,tr:7.55,tk:2227},{n:"FLYTOURWITHOUTDU",e:27,gmv:33006,profit:2326,tr:7.05,tk:1222},
+  {n:"GOL",e:17,gmv:25290,profit:1648,tr:6.52,tk:1488},{n:"FLYTOURTO",e:10,gmv:25040,profit:972,tr:3.88,tk:2504},
+];
+const hotelDest=[
+  {d:"BELO HORIZONTE - MG",e:46,gmv:18280,tr:12.04,tk:397},{d:"RIO DE JANEIRO - RJ",e:44,gmv:51204,tr:11.75,tk:1164},
+  {d:"SÃO PAULO - SP",e:36,gmv:20935,tr:11.93,tk:581},{d:"MACEIÓ - AL",e:24,gmv:25082,tr:9.10,tk:1045},
+  {d:"GRAMADO - RS",e:24,gmv:29965,tr:12.65,tk:1249},{d:"FLORIANÓPOLIS - SC",e:23,gmv:46467,tr:10.83,tk:2020},
+  {d:"SALVADOR - BA",e:21,gmv:40150,tr:12.81,tk:1912},{d:"CURITIBA - PR",e:16,gmv:9943,tr:12.53,tk:621},
+  {d:"FOZ DO IGUAÇU - PR",e:16,gmv:18964,tr:12.01,tk:1185},{d:"OURO PRETO - MG",e:15,gmv:12345,tr:9.24,tk:823},
+];
+const hotelFornec=[
+  {f:"Exclusivo Onhappy - Ville Real Hotel",c:"OURO PRETO - MG",e:8,gmv:9090,tr:8.47,tk:1136},
+  {f:"Villas Supreme Hotel",c:"MACEIÓ - AL",e:7,gmv:1850,tr:12.86,tk:264},
+  {f:"Mercure BH Lourdes",c:"BH - MG",e:6,gmv:2615,tr:13.08,tk:436},
+  {f:"Exclusivo Onhappy - China Park",c:"DOMINGOS MARTINS - ES",e:5,gmv:7472,tr:7.17,tk:1494},
+  {f:"IBIS BUDGET BOTAFOGO",c:"RIO DE JANEIRO - RJ",e:5,gmv:6680,tr:12.38,tk:1336},
+];
+let saldoEmp=[
+  {e:"TELLERINA COM. DE PRESENTES",c:96,s:286174,tk:2981},{e:"CARDIF DO BRASIL VIDA E PREVIDÊNCIA",c:31,s:47066,tk:1518},
+  {e:"FLASH TECNOLOGIA E INST. PAGAMENTO",c:5,s:41519,tk:8304},{e:"DIMENSA S.A",c:6,s:40855,tk:6809},
+  {e:"GLOBAL ELETRONICS",c:14,s:33285,tk:2377},{e:"FINLANDIA CORRETORA DE SEGUROS",c:3,s:30058,tk:10019},
+  {e:"BS2 SEGUROS S.A.",c:2,s:30000,tk:15000},{e:"BR CONSORCIOS ADMINISTRADORA",c:4,s:29000,tk:7250},
+  {e:"EQUATORIAL MARANHÃO",c:89,s:22750,tk:256},{e:"LG Informática S/A",c:5,s:21360,tk:4272},
+];
+let cuponsBase=[
+  {tipo:"MKT",ct:"birthday",qd:12,vd:3252.5,qm:43,vm:29912,qa:780,va:253054},
+  {tipo:"MKT",ct:"cashback",qd:5,vd:450.6,qm:34,vm:3214,qa:185,va:111364},
+  {tipo:"MKT",ct:"first_buy",qd:42,vd:5900,qm:125,vm:29867,qa:2114,va:372476},
+  {tipo:"MKT",ct:"mgm",qd:0,vd:0,qm:7,vm:280,qa:929,va:57844},
+  {tipo:"MKT",ct:"refund",qd:1,vd:497,qm:10,vm:16678,qa:173,va:102253},
+  {tipo:"Premiação",ct:"onfly_reward",qd:0,vd:0,qm:5,vm:11903,qa:81,va:85774},
+  {tipo:"Premiação",ct:"reward",qd:2,vd:10739,qm:12,vm:45375,qa:299,va:1043738},
+];
+const exclTop10=[
+  {h:"Excl. Onhappy - Hotel Fazenda Brisa Itu",c:"ITU - SP",e:18,gmv:15897.22,profit:-21355.22,tr:-134.33,tk:883.18},
+  {h:"Excl. Onhappy - Sued's Cabralia",c:"PORTO SEGURO - BA",e:15,gmv:2923.99,profit:-3890.01,tr:-133.04,tk:194.93},
+  {h:"Excl. Onhappy - Royal Tulip Holambra",c:"HOLAMBRA - SP",e:14,gmv:7591.21,profit:-3528.99,tr:-46.49,tk:542.23},
+  {h:"Excl. OnHappy - Wyndham Olímpia Royal Hotels",c:"OLÍMPIA - SP",e:9,gmv:6668.50,profit:-3210.87,tr:-48.15,tk:740.94},
+  {h:"Excl. Onhappy - Wyndham Gramado Termas",c:"GRAMADO - RS",e:9,gmv:6711.01,profit:-4156.19,tr:-61.93,tk:745.67},
+  {h:"Excl. Onhappy - Wyndham Olímpia - Ceia de Natal",c:"OLÍMPIA - SP",e:7,gmv:10479.00,profit:-7477.01,tr:-71.35,tk:1497.00},
+  {h:"Excl. Onhappy - Sued's Segundo Sol",c:"PORTO SEGURO - BA",e:6,gmv:2889.34,profit:-2654.66,tr:-91.88,tk:481.56},
+  {h:"Excl. Onhappy - Promenade Link Stay",c:"RIO DE JANEIRO - RJ",e:6,gmv:2080.00,profit:-2064.00,tr:-99.23,tk:346.67},
+  {h:"⚡ Oferta Relâmpago - Fazzenda Park Hotel",c:"GASPAR - SC",e:5,gmv:10145.92,profit:-8229.08,tr:-81.11,tk:2029.18},
+  {h:"Hotel Fazenda Vale Amanhecer",c:"IGARAPÉ - MG",e:5,gmv:4884.00,profit:-3096.00,tr:-63.39,tk:976.80},
+];
+const exclMensal=[
+  {m:"2026-03",e:13,gmv:16562,profit:1285,tr:7.76,tk:1274,hoteis:2},
+  {m:"2025-06",e:2,gmv:1614,profit:154.08,tr:9.54,tk:807,hoteis:2},
+  {m:"2025-03",e:27,gmv:21088.19,profit:-20334.14,tr:-96.43,tk:781,hoteis:12},
+  {m:"2025-02",e:17,gmv:18417.3,profit:-12375.7,tr:-67.19,tk:1083,hoteis:11},
+  {m:"2025-01",e:35,gmv:30128.03,profit:-20013.09,tr:-66.42,tk:861,hoteis:11},
+  {m:"2024-12",e:42,gmv:44590.68,profit:-29092.62,tr:-65.24,tk:1062,hoteis:12},
+];
+const exclDetalhe=[
+  {m:"2026-03",h:"Exclusivo Onhappy - Ville Real Hotel",c:"OURO PRETO - MG",e:8,gmv:9090,profit:769.23,tr:8.47,tk:1136},
+  {m:"2026-03",h:"Exclusivo Onhappy - China Park",c:"DOMINGOS MARTINS - ES",e:5,gmv:7472,profit:535.62,tr:7.17,tk:1494},
+  {m:"2025-06",h:"Pousada Do Tesouro",c:"PARATY - RJ",e:1,gmv:672,profit:240,tr:35.71,tk:672},
+  {m:"2025-06",h:"Novotel Rio Barra Da Tijuca",c:"RIO DE JANEIRO - RJ",e:1,gmv:942,profit:-85.92,tr:-9.12,tk:942},
+  {m:"2025-03",h:"Excl. Onhappy - Hotel Fazenda Brisa Itu",c:"ITU - SP",e:7,gmv:6430.19,profit:-9811.25,tr:-152.58,tk:918.6},
+  {m:"2025-02",h:"⚡ Oferta Relâmpago - Fazzenda Park Hotel",c:"GASPAR - SC",e:5,gmv:10145.92,profit:-8229.08,tr:-81.11,tk:2029.18},
+  {m:"2025-01",h:"Excl. Onhappy - Hotel Fazenda Brisa Itu",c:"ITU - SP",e:7,gmv:6279.02,profit:-9236.98,tr:-147.11,tk:897},
+  {m:"2024-12",h:"Excl. Onhappy - Wyndham Olímpia - Ceia de Natal",c:"OLÍMPIA - SP",e:7,gmv:10479,profit:-7477.01,tr:-71.35,tk:1497},
+];
+
+// ══ PAINEL STATUS ══
+function fmtISO(iso){
+  // Converte "2026-04-08T17:50:00.000Z" → "08/04 14:50" (horário BRT = UTC-3)
+  try{
+    if(!iso||iso==='—')return'—';
+    const d=new Date(iso);
+    if(isNaN(d))return iso;
+    return d.toLocaleString('pt-BR',{timeZone:'America/Sao_Paulo',day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).replace(',','');
+  }catch(e){return iso;}
+}
+function atualizarPainelStatus(meta){
+  try{
+    const isoRaw=meta?.find(r=>r.chave==='ultima_atualizacao')?.valor||'—';
+    const status=meta?.find(r=>r.chave==='status')?.valor||'—';
+    const ok=status==='OK';
+    const rodou=fmtISO(isoRaw);
+    const rodScript=document.getElementById('rod-script');
+    if(rodScript){
+      rodScript.innerHTML=`
+        <div style="font-size:9px;font-weight:700;color:${ok?'var(--green)':'var(--red)'};margin-bottom:2px">${ok?'✅ Atualizado':'❌ Erro'}</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text)">Rodou em ${rodou}</div>
+        ${!ok?`<div style="font-size:9px;color:var(--red);margin-top:2px">${status}</div>`:''}
+      `;
+    }
+    const ts=rodou!=='—'?rodou.split(' ')[1]||rodou:'—';
+    ['rod-gmv','rod-vidas','rod-cupons'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=ts;});
+  }catch(e){console.warn('Status panel:',e);}
+}
+
+// ══ CARREGAR DADOS DO WEB APP ══
+async function carregarDados(){
+  try{
+    const resp=await fetch(WEBAPP_URL);
+    if(!resp.ok)throw new Error(`HTTP ${resp.status}`);
+    const dados=await resp.json();
+
+    atualizarPainelStatus(dados.metadados);
+
+    // GMV diário
+    if(dados.gmv_diario?.length>0){
+      const mN={1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+      const raw=dados.gmv_diario;
+      const porDia={};
+      raw.forEach(r=>{
+        const iso=String(r.dia||'');
+        const d=iso.substring(8,10)+'/'+iso.substring(5,7);
+        const mesISO=iso.substring(0,7);
+        const k=mesISO+'|'+d;
+        if(!porDia[k])porDia[k]={d,mISO:mesISO,f:0,h:0,b:0,pf:0,ph:0,pb:0,ef:0,eh:0,eb:0};
+        const seg=String(r.segmento||'').toLowerCase();
+        const gv=parseFloat(r.gmv)||0,pr=parseFloat(r.profit)||0,em=parseInt(r.emissoes)||0;
+        if(seg==='flight'){porDia[k].f+=gv;porDia[k].pf+=pr;porDia[k].ef+=em;}
+        else if(seg==='hotel'){porDia[k].h+=gv;porDia[k].ph+=pr;porDia[k].eh+=em;}
+        else if(seg==='bus'||seg==='road'){porDia[k].b+=gv;porDia[k].pb+=pr;porDia[k].eb+=em;}
+      });
+      gmvDia=Object.values(porDia).sort((a,b)=>a.mISO.localeCompare(b.mISO)||a.d.localeCompare(b.d));
+    }
+
+    // GMV mensal
+    if(dados.gmv_mensal?.length>0){
+      const mN={1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};
+      const novos=dados.gmv_mensal.map(r=>{
+        const iso=String(r.mes||'');
+        const mo=parseInt(iso.substring(5,7)),yr=parseInt(iso.substring(2,4));
+        const m=`${mN[mo]}/${yr}`;
+        const exist=realMensal.find(x=>x.m===m)||{vidas_acum:0,vidas_novas:0};
+        return{m,gmv:parseFloat(r.gmv)||0,profit:parseFloat(r.profit)||0,tr:parseFloat(r.take_rate)||0,emissoes:parseInt(r.emissoes)||0,vidas_acum:exist.vidas_acum,vidas_novas:exist.vidas_novas};
+      });
+      if(novos.length>0)realMensal=novos;
+    }
+
+    // Vidas diário
+    if(dados.vidas_diario?.length>0){
+      vidasDia=dados.vidas_diario.map(r=>{
+        const iso=String(r.dia||'');
+        return{d:iso.substring(8,10)+'/'+iso.substring(5,7),mISO:iso.substring(0,7),v:parseInt(r.novas_vidas)||0};
+      }).sort((a,b)=>a.mISO.localeCompare(b.mISO)||a.d.localeCompare(b.d));
+    }
+
+    // Cupons utilizados
+    if(dados.cupons_utilizados?.length>0){
+      cuponsBase=dados.cupons_utilizados.map(r=>({
+        tipo:String(r.tipo||''),ct:String(r.coupon_type||''),
+        qd:parseInt(r.qtd_ontem)||0,vd:parseFloat(r.valor_ontem)||0,
+        qm:parseInt(r.qtd_mes)||0,vm:parseFloat(r.valor_mes)||0,
+        qa:parseInt(r.qtd_ano)||0,va:parseFloat(r.valor_ano)||0,
+      }));
+      const soma=(arr,c)=>arr.reduce((s,r)=>s+(r[c]||0),0);
+      const mkt=cuponsBase.filter(r=>r.tipo==='MKT'),prem=cuponsBase.filter(r=>r.tipo==='Premiação');
+      cupD1={mkt:soma(mkt,'vd'),prem:soma(prem,'vd'),tot:soma(cuponsBase,'vd'),qmkt:soma(mkt,'qd'),qprem:soma(prem,'qd'),qtot:soma(cuponsBase,'qd')};
+      cupMesVig={mkt:soma(mkt,'vm'),prem:soma(prem,'vm'),tot:soma(cuponsBase,'vm'),qmkt:soma(mkt,'qm'),qprem:soma(prem,'qm'),qtot:soma(cuponsBase,'qm')};
+      cupAno={mkt:soma(mkt,'va'),prem:soma(prem,'va'),tot:soma(cuponsBase,'va'),qmkt:soma(mkt,'qa'),qprem:soma(prem,'qa'),qtot:soma(cuponsBase,'qa')};
+    }
+
+    // Saldo empresas
+    if(dados.cupons_saldo?.length>0){
+      saldoEmp=dados.cupons_saldo.map(r=>({e:String(r.empresa||''),c:parseInt(r.cupons_ativos)||0,s:parseFloat(r.saldo_total)||0,tk:parseFloat(r.ticket_medio)||0}));
+    }
+
+    // Consolidadores
+    if(dados.aereo_consolidadores?.length>0){
+      consolData=dados.aereo_consolidadores.map(r=>({n:String(r.consolidador||''),e:parseInt(r.emissoes)||0,gmv:parseFloat(r.gmv)||0,profit:parseFloat(r.profit)||0,tr:parseFloat(r.take_rate)||0,tk:parseFloat(r.ticket_medio)||0}));
+    }
+
+    // Recalcular trDia e profDia
+    profDia=gmvDia.map(r=>({d:r.d,mISO:r.mISO,p:r.pf+r.ph+r.pb}));
+    trDia=gmvDia.map(r=>{
+      const tot=r.f+r.h+r.b,prof=r.pf+r.ph+r.pb;
+      return{d:r.d,mISO:r.mISO,gmv:tot,tr:tot>0?+((prof/tot)*100).toFixed(2):0,trf:r.f>0?+((r.pf/r.f)*100).toFixed(2):0,trh:r.h>0?+((r.ph/r.h)*100).toFixed(2):0,trb:r.b>0?+((r.pb/r.b)*100).toFixed(2):0,f:r.f,h:r.h,b:r.b,pf:r.pf,ph:r.ph,pb:r.pb,ef:r.ef,eh:r.eh,eb:r.eb};
+    });
+
+    // Re-renderizar página ativa com dados frescos
+    const pid=document.querySelector('.page.active')?.id?.replace('page-','');
+    if(pid&&pR[pid]){done.delete(pid);pR[pid]();done.add(pid);}
+    console.log('✅ Dados atualizados do Web App');
+
+  }catch(e){
+    console.error('❌ Web App erro:',e);
+    const el=document.getElementById('rod-script');
+    if(el)el.innerHTML=`<div style="font-size:9px;font-weight:700;color:var(--red)">❌ Sem conexão</div><div style="font-size:10px;color:var(--muted)">Usando dados locais</div>`;
+  }
+}
+
+// ══ CHARTS ══
+const mC=()=>getComputedStyle(document.documentElement).getPropertyValue('--muted').trim()||'#6B6B8A';
+const bC=()=>getComputedStyle(document.documentElement).getPropertyValue('--border').trim()||'#E0DAFF';
+Chart.defaults.font.family="'Plus Jakarta Sans',sans-serif";
+const CH={};
+function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
+function mkBar(id,labels,datasets,opts={}){dc(id);const el=document.getElementById(id);if(!el)return;CH[id]=new Chart(el,{type:"bar",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,indexAxis:opts.h?"y":"x",scales:{x:{stacked:!!opts.st,ticks:{color:mC(),font:{size:10},...(opts.xf?{callback:opts.xf}:{})},grid:{color:bC()+"33"},maxRotation:opts.h?0:45},y:{stacked:!!opts.st,ticks:{color:mC(),font:{size:10},...(opts.yf?{callback:opts.yf}:{})},grid:{color:bC()+"33"}}},scales:{x:{ticks:{color:mC(),font:{size:10},...(opts.xf?{callback:opts.xf}:{})},grid:{color:bC()+"33"},maxRotation:opts.h?0:45},y:{ticks:{color:mC(),font:{size:10},...(opts.yf?{callback:opts.yf}:{})},grid:{color:bC()+"33"}}},plugins:{legend:{labels:{color:mC(),font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+(opts.tip?opts.tip(c.raw):c.raw)}}}}});}
+function mkLine(id,labels,datasets,opts={}){dc(id);const el=document.getElementById(id);if(!el)return;CH[id]=new Chart(el,{type:"line",data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:mC(),font:{size:10}},grid:{color:bC()+"33"},maxRotation:45},y:{ticks:{color:mC(),font:{size:10},...(opts.yf?{callback:opts.yf}:{})},grid:{color:bC()+"33"},...(opts.dom?{min:opts.dom[0],max:opts.dom[1]}:{})}},plugins:{legend:{labels:{color:mC(),font:{size:11}}},tooltip:{callbacks:{label:c=>c.dataset.label+": "+(opts.tip?opts.tip(c.raw):c.raw)}}}}});}
+function mkDoughnut(id,labels,data,colors){dc(id);const el=document.getElementById(id);if(!el)return;CH[id]=new Chart(el,{type:"doughnut",data:{labels,datasets:[{data,backgroundColor:colors,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"right",labels:{color:mC(),font:{size:11},padding:12}}}}});}
+function momBadge(c,p){if(!p||p===0)return'<span class="mom-eq">—</span>';const pct=((c-p)/Math.abs(p)*100).toFixed(1);if(pct>0)return`<span class="mom-up">▲ ${pct}%</span>`;if(pct<0)return`<span class="mom-dn">▼ ${Math.abs(pct)}%</span>`;return`<span class="mom-eq">= 0%</span>`;}
+const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+const setStyle=(id,prop,val)=>{const el=document.getElementById(id);if(el)el.style[prop]=val;};
+
+// ══ RENDER DAILY ══
+function renderDaily(){
+  const ontemISO=getOntemISO(),ontemDisp=formatDia(ontemISO),mesISO=getMesISO(ontemISO);
+  set('daily-title',`📋 Report Daily — ${ontemDisp}`);
+  const d1=trDia.find(r=>r.mISO===mesISO&&r.d===ontemDisp)||trDia.filter(r=>r.mISO===mesISO).slice(-1)[0]||trDia[trDia.length-1]||{gmv:0,tr:0,trf:0,trh:0,trb:0,f:0,h:0,b:0,pf:0,ph:0,pb:0,ef:0,eh:0,eb:0};
+  const d1Prof=d1.pf+d1.ph+d1.pb||0;
+  const d1Vidas=vidasDia.find(r=>r.mISO===mesISO&&r.d===ontemDisp)||vidasDia.filter(r=>r.mISO===mesISO).slice(-1)[0]||{v:0};
+  const mN={Jan:'01',Fev:'02',Mar:'03',Abr:'04',Mai:'05',Jun:'06',Jul:'07',Ago:'08',Set:'09',Out:'10',Nov:'11',Dez:'12'};
+  const lastM=realMensal.find(r=>{const p=r.m.split('/');return'20'+p[1]+'-'+mN[p[0]]===mesISO;})||realMensal.filter(r=>r.gmv>0).slice(-1)[0]||realMensal[realMensal.length-1];
+  const nDias=diasNoMes(lastM.m),metaGmvMes=metasAnuais.find(m=>m.m===lastM.m)?.gm||2300000;
+  const metaDiaGmv=Math.round(metaGmvMes/nDias),metaDiaVidas=Math.round(META_VIDAS_MES/nDias),metaVidasMes=metaVidasNovas(lastM.m);
+  const gmvOk=d1.gmv>=metaDiaGmv,gmvPct=(d1.gmv/metaDiaGmv*100).toFixed(1);
+  set('d-gmv-val',fBRL(d1.gmv));setStyle('d-gmv-val','color',gmvOk?'var(--green)':'var(--amber)');
+  set('d-gmv-meta',`Meta diária: ${fBRL(metaDiaGmv)}`);
+  setStyle('d-gmv-bar','width',Math.min(gmvPct,100)+'%');setStyle('d-gmv-bar','background',gmvOk?'var(--green)':'var(--amber)');
+  set('d-gmv-pct',gmvPct+'%');setStyle('d-gmv-pct','color',gmvOk?'var(--green)':'var(--amber)');
+  set('d-gmv-delta',gmvOk?`+${fBRL(d1.gmv-metaDiaGmv)} acima`:`−${fBRL(metaDiaGmv-d1.gmv)} abaixo`);
+  const emisD1=(d1.ef||0)+(d1.eh||0)+(d1.eb||0)||Math.round(d1.gmv/1500);
+  set('d-emis-val',emisD1);set('d-emis-sub',`${d1.ef||0} voos · ${d1.eh||0} hotel · ${d1.eb||0} ônibus`);
+  set('d-emis-pct',`Ticket ${fBRL(emisD1>0?Math.round(d1.gmv/emisD1):0)}`);set('d-emis-delta',`Mês: ${lastM.emissoes||0}`);setStyle('d-emis-bar','width','70%');
+  const tmD1=emisD1>0?Math.round(d1.gmv/emisD1):0,tmOk=tmD1>=META_TM,tmPct=(tmD1/META_TM*100).toFixed(1);
+  set('d-tm-val',fBRL(tmD1));setStyle('d-tm-val','color',tmOk?'var(--green)':'var(--amber)');
+  setStyle('d-tm-bar','width',Math.min(tmPct,100)+'%');setStyle('d-tm-bar','background',tmOk?'var(--green)':'var(--amber)');
+  set('d-tm-pct',tmPct+'%');setStyle('d-tm-pct','color',tmOk?'var(--green)':'var(--amber)');
+  set('d-tm-delta',tmOk?`+${fBRL(tmD1-META_TM)} acima`:`−${fBRL(META_TM-tmD1)} abaixo`);
+  const trOk=d1.tr>=8,trPct=(d1.tr/8*100).toFixed(1);
+  set('d-tr-val',f2(d1.tr)+'%');setStyle('d-tr-val','color',trOk?'var(--green)':'var(--red)');
+  setStyle('d-tr-bar','width',Math.min(trPct,100)+'%');setStyle('d-tr-bar','background',trOk?'var(--green)':'var(--red)');
+  set('d-tr-pct',trPct+'%');setStyle('d-tr-pct','color',trOk?'var(--green)':'var(--red)');
+  set('d-tr-delta',trOk?`+${f2(d1.tr-8)} pp acima`:`−${f2(8-d1.tr)} pp abaixo`);
+  set('d-tr-flight',f2(d1.trf)+'%');setStyle('d-tr-flight','color',trC(d1.trf));set('d-tr-flight-sub',fBRL(d1.f));
+  set('d-tr-hotel',f2(d1.trh)+'%');setStyle('d-tr-hotel','color',trC(d1.trh));set('d-tr-hotel-sub',fBRL(d1.h));
+  set('d-tr-bus',d1.b>0?f2(d1.trb)+'%':'—');setStyle('d-tr-bus','color',d1.b>0?trC(d1.trb):'var(--muted)');set('d-tr-bus-sub',d1.b>0?fBRL(d1.b):'Sem emissões');
+  set('d-profit-val',fBRL(d1Prof));set('d-profit-meta',`TR real: ${f2(d1.tr)}% · Meta: 8,00%`);
+  const ultTR=trDia.filter(r=>r.mISO===mesISO).slice(-7);const grafTR=ultTR.length>0?ultTR:trDia.slice(-7);
+  mkBar('c-daily-tr',grafTR.map(r=>r.d),[{label:'TR',data:grafTR.map(r=>r.tr),backgroundColor:grafTR.map(r=>r.tr>=8?'rgba(15,155,110,.7)':'rgba(229,62,62,.7)'),borderRadius:4},{label:'Meta 8%',data:grafTR.map(()=>8),type:'line',borderColor:'rgba(192,123,0,.6)',borderDash:[4,3],borderWidth:1.5,pointRadius:0,backgroundColor:'transparent'}],{yf:v=>v+'%',tip:v=>f2(v)+'%'});
+  set('d-cup-total-val',fBRL(cupD1.tot));set('d-cup-total-meta',`${cupD1.qtot} cupons utilizados`);
+  set('d-cup-mkt-val',fBRL(cupD1.mkt));set('d-cup-mkt-sub',`${cupD1.qmkt} cupons`);
+  set('d-cup-prem-val',fBRL(cupD1.prem));set('d-cup-prem-sub',`${cupD1.qprem} cupons`);
+  const cupPctGmv=d1.gmv>0?(cupD1.tot/d1.gmv*100).toFixed(1):'0';
+  set('d-cup-pct-val',cupPctGmv+'%');set('d-cup-pct-meta',`${fBRL(cupD1.tot)} sobre GMV de ${fBRL(d1.gmv)}`);
+  mkDoughnut('c-daily-cup',['MKT','Premiação'],[cupD1.mkt,cupD1.prem],['rgba(91,75,245,.75)','rgba(192,123,0,.75)']);
+  const gmvMesArr=gmvDia.filter(r=>r.mISO===mesISO),vidasMesArr=vidasDia.filter(r=>r.mISO===mesISO);
+  const diaDecorrido=parseInt(ontemISO.split('-')[2]);
+  const gmvAcumMes=gmvMesArr.reduce((s,r)=>s+r.f+r.h+r.b,0),vidasAcumMes=vidasMesArr.reduce((s,r)=>s+r.v,0);
+  const ritmGmv=diaDecorrido>0?gmvAcumMes/diaDecorrido:0,ritmVidas=diaDecorrido>0?vidasAcumMes/diaDecorrido:0;
+  const fcGmv=Math.round(ritmGmv*nDias),fcVidas=Math.round(ritmVidas*nDias);
+  const fcGmvPct=(fcGmv/metaGmvMes*100).toFixed(1),fcVidasPct=(fcVidas/metaVidasMes*100).toFixed(1);
+  const fcGmvOk=fcGmv>=metaGmvMes,fcVidasOk=fcVidas>=metaVidasMes;
+  set('fc-gmv-proj',fBRL(fcGmv));setStyle('fc-gmv-proj','color',fcGmvOk?'var(--green)':'var(--amber)');
+  set('fc-gmv-proj-meta',`Meta do mês: ${fBRL(metaGmvMes)}`);
+  setStyle('fc-gmv-proj-bar','width',Math.min(fcGmvPct,100)+'%');setStyle('fc-gmv-proj-bar','background',fcGmvOk?'var(--green)':'var(--amber)');
+  set('fc-gmv-proj-pct',fcGmvPct+'%');setStyle('fc-gmv-proj-pct','color',fcGmvOk?'var(--green)':'var(--amber)');
+  set('fc-gmv-proj-delta',fcGmvOk?`+${fBRL(fcGmv-metaGmvMes)} acima`:`−${fBRL(metaGmvMes-fcGmv)} abaixo`);
+  set('fc-gmv-acum',fBRL(gmvAcumMes));set('fc-gmv-dias',diaDecorrido+' dia(s)');set('fc-gmv-diasmes',nDias+' dias');set('fc-gmv-ritmo',fBRL(Math.round(ritmGmv))+'/dia');
+  set('fc-vidas-proj',fcVidas.toLocaleString('pt-BR'));setStyle('fc-vidas-proj','color',fcVidasOk?'var(--green)':'var(--amber)');
+  set('fc-vidas-proj-meta',`Meta do mês: ${metaVidasMes.toLocaleString('pt-BR')} vidas`);
+  setStyle('fc-vidas-proj-bar','width',Math.min(fcVidasPct,100)+'%');setStyle('fc-vidas-proj-bar','background',fcVidasOk?'var(--green)':'var(--amber)');
+  set('fc-vidas-proj-pct',fcVidasPct+'%');setStyle('fc-vidas-proj-pct','color',fcVidasOk?'var(--green)':'var(--amber)');
+  set('fc-vidas-proj-delta',fcVidasOk?`+${(fcVidas-metaVidasMes).toLocaleString('pt-BR')} acima`:`−${(metaVidasMes-fcVidas).toLocaleString('pt-BR')} abaixo`);
+  set('fc-vidas-acum',vidasAcumMes.toLocaleString('pt-BR'));set('fc-vidas-dias',diaDecorrido+' dia(s)');set('fc-vidas-meta-val',metaVidasMes.toLocaleString('pt-BR'));set('fc-vidas-ritmo',Math.round(ritmVidas).toLocaleString('pt-BR')+'/dia');
+  const vidasOk=d1Vidas.v>=metaDiaVidas,vidasPct=(d1Vidas.v/metaDiaVidas*100).toFixed(1),vidasAcumPct=(vidasAcumMes/metaVidasMes*100).toFixed(1);
+  set('d-vidas-val',d1Vidas.v.toLocaleString('pt-BR'));setStyle('d-vidas-val','color',vidasOk?'var(--green)':'var(--amber)');
+  set('d-vidas-meta',`Meta diária: ${metaDiaVidas.toLocaleString('pt-BR')}`);
+  setStyle('d-vidas-bar','width',Math.min(vidasPct,100)+'%');setStyle('d-vidas-bar','background',vidasOk?'var(--green)':'var(--amber)');
+  set('d-vidas-pct',vidasPct+'%');setStyle('d-vidas-pct','color',vidasOk?'var(--green)':'var(--amber)');
+  set('d-vidas-delta',vidasOk?`+${(d1Vidas.v-metaDiaVidas).toLocaleString('pt-BR')} acima`:`−${(metaDiaVidas-d1Vidas.v).toLocaleString('pt-BR')} abaixo`);
+  set('d-vidas-meta-sub',`${nDias} dias em ${mesISO} · Meta/dia: ${metaDiaVidas}`);
+  set('d-vidas-acum',vidasAcumMes.toLocaleString('pt-BR'));set('d-vidas-acum-sub',`Meta mensal: ${metaVidasMes.toLocaleString('pt-BR')}`);
+  setStyle('d-vidas-acum-bar','width',Math.min(vidasAcumPct,100)+'%');
+  set('d-vidas-acum-pct',vidasAcumPct+'%');
+  set('d-vidas-acum-delta',vidasAcumMes>=metaVidasMes?'✓ Meta batida':`Faltam ${(metaVidasMes-vidasAcumMes).toLocaleString('pt-BR')}`);
+  window._snap={data:ontemDisp,gmv:d1.gmv,metaDiaGmv,gmvPct,tm:tmD1,tmPct,tr:d1.tr,trOk,trf:d1.trf,trh:d1.trh,trb:d1.b>0?d1.trb:null,emis:emisD1,ef:d1.ef,eh:d1.eh,eb:d1.eb,profit:d1Prof,cupTotal:cupD1.tot,cupMkt:cupD1.mkt,cupPrem:cupD1.prem,cupPctGmv,vidasD1:d1Vidas.v,metaDiaVidas,vidasPct,fcGmv,metaGmvMes,fcGmvPct,fcVidas,metaVidasMes,fcVidasPct,mesLabel:lastM.m};
+}
+
+function enviarWhatsApp(){
+  const s=window._snap||{};if(!s.data){alert('Aguarde os dados carregarem.');return;}
+  const emo=v=>v?'✅':'⚠️';
+  const msg=`📋 *Report Daily Onhappy — ${s.data}*\n\n💰 *GMV do Dia*\n• Realizado: *${fBRL(s.gmv)}*\n• Meta: ${fBRL(s.metaDiaGmv)} | Ating.: ${s.gmvPct}% ${emo(s.gmv>=s.metaDiaGmv)}\n• Ticket Médio: ${fBRL(s.tm)} (meta R$1.100) ${emo(s.tm>=1100)}\n• Emissões: ${s.emis}\n\n📈 *Take Rate*\n• TR Total: *${f2(s.tr)}%* | Meta 8% ${emo(s.trOk)}\n• ✈️ Aéreo: ${f2(s.trf)}% | 🏨 Hotel: ${f2(s.trh)}%\n• Profit: ${fBRL(s.profit)}\n\n🎫 *Cupons*\n• Total: ${fBRL(s.cupTotal)} (${s.cupPctGmv}% do GMV)\n• MKT: ${fBRL(s.cupMkt)} | Premiação: ${fBRL(s.cupPrem)}\n\n👥 *Vidas Ativas*\n• D-1: ${s.vidasD1} | Meta/dia: ${s.metaDiaVidas} ${emo(s.vidasD1>=s.metaDiaVidas)}\n\n🔮 *Forecast ${s.mesLabel}*\n• GMV: ~${fBRL(s.fcGmv)} vs meta ${fBRL(s.metaGmvMes)} (${s.fcGmvPct}%) ${emo(parseFloat(s.fcGmvPct)>=100)}\n• Vidas: ~${s.fcVidas?.toLocaleString('pt-BR')} vs meta ${s.metaVidasMes?.toLocaleString('pt-BR')} (${s.fcVidasPct}%) ${emo(parseFloat(s.fcVidasPct)>=100)}\n\n_Onhappy BI · company 4609_`;
+  window.open('https://wa.me/?text='+encodeURIComponent(msg),'_blank');
+}
+
+// ══ BIG NUMBERS ══
+function renderBigNumbers(){
+  const ontemISO=getOntemISO(),mesISO=getMesISO(ontemISO),ontemDisp=formatDia(ontemISO);
+  const lastM=realMensal.filter(r=>r.gmv>0).slice(-1)[0]||realMensal[realMensal.length-1];
+  const metaNovas=metaVidasNovas(lastM.m),metaGmvMes=metasAnuais.find(m=>m.m===lastM.m)?.gm||2300000;
+  const nDias=diasNoMes(lastM.m),metaDiaGmv=Math.round(metaGmvMes/nDias);
+  const mN={Jan:'01',Fev:'02',Mar:'03',Abr:'04',Mai:'05',Jun:'06',Jul:'07',Ago:'08',Set:'09',Out:'10',Nov:'11',Dez:'12'};
+  const d1=trDia.find(r=>r.mISO===mesISO&&r.d===ontemDisp)||trDia.filter(r=>r.mISO===mesISO).slice(-1)[0]||trDia[trDia.length-1]||{gmv:0,tr:0};
+  const gmvAno=realMensal.reduce((s,m)=>s+(m.gmv||0),0);
+  const mesesComDados=realMensal.filter(r=>r.gmv>0);
+  const forecast=mesesComDados.length>0?Math.round(gmvAno/mesesComDados.length*12):0;
+  const pctAno=(gmvAno/33000000*100).toFixed(1);
+  set('card-gmv-ano',fBRL(gmvAno));document.getElementById('bar-gmv-ano').style.width=Math.min(pctAno,100)+'%';
+  set('pct-gmv-ano',pctAno+'%');set('lbl-gmv-meses',mesesComDados.map(m=>m.m.split('/')[0]).join('+'));
+  set('fc-gmv-ano','~'+fBRL(forecast));set('fc-gmv-ano-sub',`Ritmo ${fBRL(Math.round(gmvAno/Math.max(mesesComDados.length,1)))}/mês`);
+  const gmvMesArr=gmvDia.filter(r=>r.mISO===mesISO);
+  const gmvMes=gmvMesArr.length>0?gmvMesArr.reduce((s,r)=>s+r.f+r.h+r.b,0):lastM.gmv;
+  const pctMes=(gmvMes/metaGmvMes*100).toFixed(1);
+  set('card-gmv-mes',fBRL(gmvMes));set('sub-gmv-mes',`Meta: ${fBRL(metaGmvMes)}`);
+  document.getElementById('bar-gmv-mes').style.width=Math.min(pctMes,100)+'%';set('pct-gmv-mes',pctMes+'%');
+  set('fc-gmv-mes-sub',gmvMes>=metaGmvMes?`+${fBRL(gmvMes-metaGmvMes)}`:`−${fBRL(metaGmvMes-gmvMes)}`);
+  set('fc-gmv-mes','~'+fBRL(gmvMes));set('fc-gmv-mes-sub2',`Ritmo ~${fBRL(Math.round(gmvMes/Math.max(gmvMesArr.length,1)))}/dia`);
+  const d1ok=d1.gmv>=metaDiaGmv;
+  set('card-gmv-d1',fBRL(d1.gmv));setStyle('card-gmv-d1','color',d1ok?'var(--green)':'var(--amber)');
+  set('sub-gmv-d1',`Meta diária: ${fBRL(metaDiaGmv)}`);
+  document.getElementById('bar-gmv-d1').style.width=Math.min((d1.gmv/metaDiaGmv*100),100)+'%';
+  document.getElementById('bar-gmv-d1').style.background=d1ok?'var(--green)':'var(--amber)';
+  set('pct-gmv-d1',(d1.gmv/metaDiaGmv*100).toFixed(1)+'%'+(d1ok?' ✓':''));
+  setStyle('pct-gmv-d1','color',d1ok?'var(--green)':'var(--amber)');
+  set('fc-gmv-d1',d1ok?`+${fBRL(d1.gmv-metaDiaGmv)}`:`−${fBRL(metaDiaGmv-d1.gmv)}`);
+  const diasGraf=gmvMesArr.length>0?gmvMesArr:gmvDia;
+  mkBar("c-gmv-dia",diasGraf.map(d=>d.d),[{label:"GMV",data:diasGraf.map(d=>d.f+d.h+d.b),backgroundColor:diasGraf.map(d=>(d.f+d.h+d.b)>=metaDiaGmv?"rgba(15,155,110,.7)":"rgba(91,75,245,.55)"),borderRadius:4},{label:`Meta ${fBRL(metaDiaGmv)}`,data:diasGraf.map(()=>metaDiaGmv),type:"line",borderColor:"rgba(192,123,0,.7)",borderDash:[5,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
+  const vidasMesArr=vidasDia.filter(r=>r.mISO===mesISO);
+  const vidasNovas=vidasMesArr.reduce((s,r)=>s+r.v,0)||lastM.vidas_novas;
+  const pctVidas=(vidasNovas/metaNovas*100).toFixed(1);
+  const totalV2026=realMensal.reduce((s,m)=>s+m.vidas_novas,0);
+  set('card-vidas-total',(window._vidasTotal||95765).toLocaleString('pt-BR'));
+  set('card-vidas-2026',totalV2026.toLocaleString('pt-BR'));
+  set('sub-vidas-2026',realMensal.filter(r=>r.vidas_novas>0).map(m=>m.m.split('/')[0]+' '+m.vidas_novas.toLocaleString('pt-BR')).join(' · '));
+  set('card-vidas-mes',vidasNovas.toLocaleString('pt-BR'));set('sub-vidas-mes',`Meta: ${metaNovas.toLocaleString('pt-BR')} · ${pctVidas}%`);
+  document.getElementById('bar-vidas-mes').style.width=Math.min(pctVidas,100)+'%';set('pct-vidas-mes',pctVidas+'%');set('delta-vidas-mes',vidasNovas>=metaNovas?`+${(vidasNovas-metaNovas).toLocaleString('pt-BR')}`:`−${(metaNovas-vidasNovas).toLocaleString('pt-BR')}`);
+  const d1v=vidasMesArr.find(r=>r.d===ontemDisp)||vidasMesArr.slice(-1)[0]||{v:0};
+  set('card-vidas-d1',d1v.v.toLocaleString('pt-BR'));
+  const pico=vidasMesArr.length>0?vidasMesArr.reduce((mx,r)=>r.v>mx.v?r:mx,{v:0,d:'—'}):{v:0,d:'—'};
+  set('sub-vidas-d1',`Pico: ${pico.v.toLocaleString('pt-BR')} (${pico.d})`);
+  const diasVGraf=vidasMesArr.length>0?vidasMesArr:vidasDia;
+  mkBar("c-vidas-dia",diasVGraf.map(d=>d.d),[{label:"Novas Vidas",data:diasVGraf.map(d=>d.v),backgroundColor:diasVGraf.map(d=>d.v>=500?"rgba(91,75,245,.85)":"rgba(0,201,167,.65)"),borderRadius:4}],{tip:v=>v.toLocaleString("pt-BR")+" vidas"});
+  const todosMeses=realMensal.filter(r=>r.tr>0);
+  mkLine("c-tr-bn",todosMeses.map(m=>m.m),[{label:"Take Rate",data:todosMeses.map(m=>m.tr),borderColor:"#5B4BF5",backgroundColor:"rgba(91,75,245,.1)",borderWidth:3,pointRadius:7,tension:.4,fill:true},{label:"Meta 8%",data:todosMeses.map(()=>8),borderColor:"rgba(15,155,110,.5)",borderDash:[6,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{dom:[6,11],yf:v=>v+"%",tip:v=>f2(v)+"%"});
+  const tblTr=document.getElementById('tbl-tr-bn-meses');
+  if(tblTr){tblTr.innerHTML='';let totGmv=0,totProfit=0;todosMeses.forEach(m=>{totGmv+=m.gmv;totProfit+=m.profit;const ok=m.tr>=8;tblTr.innerHTML+=`<tr><td><strong>${m.m}</strong></td><td class="tbl-r">${fBRL(m.gmv)}</td><td class="tbl-r" style="color:${m.profit>=0?'var(--green)':'var(--red)'}">${fBRL(m.profit)}</td><td class="tbl-r">${trBadge(m.tr)}</td><td class="tbl-r">${ok?'✅ Acima':'🔴 Abaixo'}</td></tr>`;});tblTr.innerHTML+=`<tr class="tbl-tot"><td>Total 2026</td><td class="tbl-r">${fBRL(totGmv)}</td><td class="tbl-r">${fBRL(totProfit)}</td><td class="tbl-r">${trBadge(parseFloat((totProfit/totGmv*100).toFixed(2)))}</td><td class="tbl-r">—</td></tr>`;}
+}
+
+// ══ METAS ══
+function renderMetas(){
+  const mLab=metasAnuais.map(m=>m.m);
+  const realData=metasAnuais.map((m,i)=>realMensal[i]&&realMensal[i].gmv>0?realMensal[i].gmv:null);
+  dc("c-meta-gmv");const elG=document.getElementById("c-meta-gmv");if(elG){CH["c-meta-gmv"]=new Chart(elG,{type:"bar",data:{labels:mLab,datasets:[{label:"Meta",data:metasAnuais.map(m=>m.gm),backgroundColor:"rgba(91,75,245,.2)",borderRadius:4,borderColor:"rgba(91,75,245,.5)",borderWidth:1.5},{label:"Realizado",data:realData,backgroundColor:metasAnuais.map((m,i)=>realMensal[i]&&realMensal[i].gmv>0?(realMensal[i].gmv>=m.gm?"rgba(15,155,110,.75)":"rgba(192,123,0,.75)"):null),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{ticks:{color:mC(),font:{size:10}},grid:{color:bC()+"33"},maxRotation:45},y:{ticks:{color:mC(),font:{size:10},callback:v=>fBRL(v)},grid:{color:bC()+"33"}}},plugins:{legend:{labels:{color:mC(),font:{size:11}}},tooltip:{callbacks:{label:c=>{if(c.datasetIndex===1&&c.raw!=null){const meta=metasAnuais[c.dataIndex]?.gm||1;return`Realizado: ${fBRL(c.raw)} (${(c.raw/meta*100).toFixed(0)}%)`;}return c.dataset.label+": "+fBRL(c.raw);}}}}}});}
+  document.getElementById("tbl-meta-gmv").innerHTML=metasAnuais.map((m,i)=>{const r=realMensal[i];if(!r||r.gmv===0)return`<tr><td>${m.m}</td><td class="tbl-r">${fBRL(m.gm)}</td><td class="tbl-r" style="color:var(--muted)">—</td><td class="tbl-r">—</td><td class="tbl-r" style="color:var(--muted)">Pendente</td></tr>`;const pct=(r.gmv/m.gm*100).toFixed(1),ok=r.gmv>=m.gm;return`<tr><td>${m.m}</td><td class="tbl-r">${fBRL(m.gm)}</td><td class="tbl-r" style="font-weight:600">${fBRL(r.gmv)}</td><td class="tbl-r"><span style="font-weight:700;font-size:13px;color:${ok?'var(--green)':'var(--amber)'}">${pct}%</span></td><td class="tbl-r">${ok?"✅":"⚠️"} ${ok?"Batida":"Abaixo"}</td></tr>`;}).join("");
+  mkLine("c-meta-vidas",mLab,[{label:"Meta Acumulada",data:metasAnuais.map(m=>m.vm),borderColor:"rgba(91,75,245,.5)",borderDash:[6,3],borderWidth:2,pointRadius:4,backgroundColor:"transparent"},{label:"Real Acumulado",data:metasAnuais.map((m,i)=>realMensal[i]&&realMensal[i].vidas_acum>0?realMensal[i].vidas_acum:null),borderColor:"var(--a2)",backgroundColor:"rgba(0,201,167,.1)",borderWidth:3,pointRadius:6,tension:.3,fill:true}],{yf:v=>v.toLocaleString("pt-BR"),tip:v=>v?v.toLocaleString("pt-BR")+" vidas":"—"});
+  document.getElementById("tbl-meta-vidas").innerHTML=metasAnuais.map((m,i)=>{const r=realMensal[i];const mN=metaVidasNovas(m.m);if(!r)return`<tr><td>${m.m}</td><td class="tbl-r">${m.vm.toLocaleString("pt-BR")}</td><td class="tbl-r" style="color:var(--muted)">—</td><td class="tbl-r">—</td><td class="tbl-r">${mN.toLocaleString("pt-BR")}</td><td class="tbl-r" style="color:var(--muted)">Pendente</td></tr>`;const hasAcum=r.vidas_acum>0,ok=hasAcum&&r.vidas_acum>=m.vm,hasNovas=r.vidas_novas>0;if(!hasNovas)return`<tr><td>${m.m}</td><td class="tbl-r">${m.vm.toLocaleString("pt-BR")}</td><td class="tbl-r">${hasAcum?r.vidas_acum.toLocaleString("pt-BR"):"—"}</td><td class="tbl-r" style="color:var(--amber)">0</td><td class="tbl-r">${mN.toLocaleString("pt-BR")}</td><td class="tbl-r">⚠️ Abaixo</td></tr>`;return`<tr><td>${m.m}</td><td class="tbl-r">${m.vm.toLocaleString("pt-BR")}</td><td class="tbl-r">${hasAcum?r.vidas_acum.toLocaleString("pt-BR"):'<span style="color:var(--muted)">parcial</span>'}</td><td class="tbl-r" style="font-weight:600;color:${r.vidas_novas>=mN?"var(--green)":"var(--amber)"}">${r.vidas_novas.toLocaleString("pt-BR")}</td><td class="tbl-r">${mN.toLocaleString("pt-BR")}</td><td class="tbl-r">${hasAcum?(ok?"✅":"⚠️")+" "+(ok?"Batida":"Abaixo"):'🔄 Em andamento'}</td></tr>`;}).join("");
+  document.getElementById("tbl-meta-tr").innerHTML=metasAnuais.map((m,i)=>{const r=realMensal[i];if(!r||r.tr===0)return`<tr><td>${m.m}</td><td class="tbl-r">8,00%</td><td class="tbl-r" style="color:var(--muted)">—</td><td class="tbl-r">—</td><td class="tbl-r" style="color:var(--muted)">Pendente</td></tr>`;const dev=(r.tr-8).toFixed(2),ok=r.tr>=8;return`<tr><td>${m.m}</td><td class="tbl-r">8,00%</td><td class="tbl-r" style="font-weight:600;color:${ok?"var(--green)":"var(--red)"}">${f2(r.tr)}%</td><td class="tbl-r" style="color:${ok?"var(--green)":"var(--red)"};font-weight:600">${ok?"+":""}${dev} pp</td><td class="tbl-r">${ok?"✅":"🔴"} ${ok?"Batida":"Abaixo"}</td></tr>`;}).join("");
+}
+
+// ══ HISTÓRICO ══
+function renderHistorico(){
+  const all=[...hist2024,...hist2025],labs=all.map(m=>m.m);
+  mkBar("c-hist-gmv",labs,[{label:"2024",data:hist2024.map(m=>m.gmv),backgroundColor:"rgba(91,75,245,.7)",borderRadius:3},{label:"2025",data:[...Array(12).fill(null),...hist2025.map(m=>m.gmv)],backgroundColor:"rgba(0,201,167,.7)",borderRadius:3}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
+  mkLine("c-hist-tr",labs,[{label:"2024 TR",data:hist2024.map(m=>m.tr),borderColor:"#5B4BF5",backgroundColor:"transparent",borderWidth:2,pointRadius:3,tension:.3,spanGaps:true},{label:"2025 TR",data:[...Array(12).fill(null),...hist2025.map(m=>m.tr)],borderColor:"#00C9A7",backgroundColor:"transparent",borderWidth:2,pointRadius:3,tension:.3,spanGaps:true},{label:"Meta 8%",data:all.map(()=>8),borderColor:"rgba(192,123,0,.5)",borderDash:[5,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{yf:v=>v+"%",tip:v=>f2(v)+"%"});
+  mkBar("c-hist-vidas",labs,[{label:"2024",data:hist2024.map(m=>m.vidas),backgroundColor:"rgba(91,75,245,.7)",borderRadius:3},{label:"2025",data:[...Array(12).fill(null),...hist2025.map(m=>m.vidas)],backgroundColor:"rgba(0,201,167,.7)",borderRadius:3}],{tip:v=>v.toLocaleString("pt-BR")+" vidas"});
+  const h26=realMensal.filter(r=>r.gmv>0).map(m=>({m:m.m,gmv:m.gmv,profit:m.profit,tr:m.tr,emissoes:m.emissoes,vidas:m.vidas_novas,ano:"2026"}));
+  const allRows=[...hist2024.map(r=>({...r,ano:"2024"})),...hist2025.map(r=>({...r,ano:"2025"})),...h26];
+  document.getElementById("tbl-hist").innerHTML=allRows.map((r,i)=>{const prev=i>0?allRows[i-1]:null;return`<tr><td style="color:var(--muted);font-weight:600">${r.ano}</td><td>${r.m}</td><td class="tbl-r">${fBRL(r.gmv)}</td><td class="tbl-r">${prev?momBadge(r.gmv,prev.gmv):'—'}</td><td class="tbl-r" style="color:${r.profit<0?"var(--red)":"var(--green)"}">${fBRL(r.profit)}</td><td class="tbl-r">${trBadge(r.tr)}</td><td class="tbl-r">${prev?momBadge(r.tr,prev.tr):'—'}</td><td class="tbl-r">${r.emissoes.toLocaleString("pt-BR")}</td><td class="tbl-r">${r.vidas>0?r.vidas.toLocaleString("pt-BR"):"—"}</td><td class="tbl-r">${(prev&&r.vidas>0&&prev.vidas>0)?momBadge(r.vidas,prev.vidas):'—'}</td></tr>`;}).join("");
+  set('hist-vidas-2026',realMensal.reduce((s,m)=>s+m.vidas_novas,0).toLocaleString('pt-BR'));
+}
+
+// ══ YoY ══
+function renderYoY(){
+  const mL=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const g24=hist2024.map(m=>m.gmv),g25=hist2025.map(m=>m.gmv),g26=[...realMensal.map(m=>m.gmv>0?m.gmv:null),...Array(Math.max(0,12-realMensal.length)).fill(null)];
+  const t24=hist2024.map(m=>m.tr),t25=hist2025.map(m=>m.tr),t26=[...realMensal.map(m=>m.tr>0?m.tr:null),...Array(Math.max(0,12-realMensal.length)).fill(null)];
+  const v25=hist2025.map(m=>m.vidas),v26=[...realMensal.map(m=>m.vidas_novas>0?m.vidas_novas:null),...Array(Math.max(0,12-realMensal.length)).fill(null)];
+  const tot24=hist2024.reduce((s,m)=>s+m.gmv,0),tot25=hist2025.reduce((s,m)=>s+m.gmv,0),tot26=realMensal.filter(r=>r.gmv>0).reduce((s,m)=>s+m.gmv,0);
+  const tr24a=hist2024.reduce((s,m)=>s+m.tr,0)/12,tr25a=hist2025.reduce((s,m)=>s+m.tr,0)/12;
+  const rm26=realMensal.filter(r=>r.tr>0);const tr26a=rm26.length>0?rm26.reduce((s,m)=>s+m.tr,0)/rm26.length:0;
+  const vid24=hist2024.reduce((s,m)=>s+m.vidas,0),vid25=hist2025.reduce((s,m)=>s+m.vidas,0),vid26=realMensal.reduce((s,m)=>s+m.vidas_novas,0);
+  function yD(c,p){if(!p)return'';const pct=((c-p)/Math.abs(p)*100).toFixed(1);return`<span class="yoy-delta ${pct>=0?'yoy-pos':'yoy-neg'}">${pct>=0?'▲':'▼'} ${Math.abs(pct)}%</span>`;}
+  document.getElementById('yoy-cards').innerHTML=`<div class="yoy-card"><div class="yoy-lbl">💰 GMV Anual</div><div class="yoy-row"><span class="yoy-year">2024</span><span class="yoy-val">${fBRL(tot24)}</span><span></span></div><div class="yoy-row"><span class="yoy-year">2025</span><span class="yoy-val">${fBRL(tot25)}</span>${yD(tot25,tot24)}</div><div class="yoy-row"><span class="yoy-year">2026 (parcial)</span><span class="yoy-val">${fBRL(tot26)}</span></div></div><div class="yoy-card"><div class="yoy-lbl">📈 Take Rate Médio</div><div class="yoy-row"><span class="yoy-year">2024</span><span class="yoy-val">${f2(tr24a)}%</span><span></span></div><div class="yoy-row"><span class="yoy-year">2025</span><span class="yoy-val">${f2(tr25a)}%</span>${yD(tr25a,tr24a)}</div><div class="yoy-row"><span class="yoy-year">2026 (parcial)</span><span class="yoy-val">${f2(tr26a)}%</span></div></div><div class="yoy-card"><div class="yoy-lbl">👥 Vidas Novas</div><div class="yoy-row"><span class="yoy-year">2024</span><span class="yoy-val">${vid24.toLocaleString('pt-BR')}</span><span></span></div><div class="yoy-row"><span class="yoy-year">2025</span><span class="yoy-val">${vid25.toLocaleString('pt-BR')}</span>${yD(vid25,vid24)}</div><div class="yoy-row"><span class="yoy-year">2026 (parcial)</span><span class="yoy-val">${vid26.toLocaleString('pt-BR')}</span></div></div>`;
+  mkBar("c-yoy-gmv",mL,[{label:"2024",data:g24,backgroundColor:"rgba(91,75,245,.6)",borderRadius:3},{label:"2025",data:g25,backgroundColor:"rgba(0,201,167,.6)",borderRadius:3},{label:"2026",data:g26,backgroundColor:"rgba(246,195,68,.8)",borderRadius:3}],{yf:v=>fBRL(v),tip:v=>v?fBRL(v):"—"});
+  mkLine("c-yoy-tr",mL,[{label:"2024",data:t24,borderColor:"#5B4BF5",backgroundColor:"transparent",borderWidth:2,pointRadius:3,tension:.3,spanGaps:true},{label:"2025",data:t25,borderColor:"#00C9A7",backgroundColor:"transparent",borderWidth:2,pointRadius:3,tension:.3,spanGaps:true},{label:"2026",data:t26,borderColor:"#F6C344",backgroundColor:"rgba(246,195,68,.1)",borderWidth:2.5,pointRadius:5,tension:.3,spanGaps:true},{label:"Meta 8%",data:Array(12).fill(8),borderColor:"rgba(15,155,110,.4)",borderDash:[5,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{yf:v=>v+"%",tip:v=>f2(v)+"%"});
+  mkBar("c-yoy-vidas",mL,[{label:"2025",data:v25,backgroundColor:"rgba(0,201,167,.6)",borderRadius:3},{label:"2026",data:v26,backgroundColor:"rgba(246,195,68,.8)",borderRadius:3}],{tip:v=>v?v.toLocaleString("pt-BR")+" vidas":"—"});
+  document.getElementById('tbl-yoy').innerHTML=mL.map((lab,i)=>{const a=g24[i]||0,b=g25[i]||0,c=g26[i];const y1=a>0?((b-a)/a*100).toFixed(1):null,y2=b>0&&c!=null?((c-b)/b*100).toFixed(1):null;return`<tr><td>${lab}</td><td class="tbl-r">${a>0?fBRL(a):'—'}</td><td class="tbl-r">${fBRL(b)}</td><td class="tbl-r">${y1!=null?`<span class="${parseFloat(y1)>=0?'mom-up':'mom-dn'}">${parseFloat(y1)>=0?'▲':'▼'} ${Math.abs(y1)}%</span>`:'—'}</td><td class="tbl-r">${c!=null?fBRL(c):'—'}</td><td class="tbl-r">${y2!=null?`<span class="${parseFloat(y2)>=0?'mom-up':'mom-dn'}">${parseFloat(y2)>=0?'▲':'▼'} ${Math.abs(y2)}%</span>`:'—'}</td><td class="tbl-r">${trBadge(t24[i])}</td><td class="tbl-r">${trBadge(t25[i])}</td><td class="tbl-r">${t26[i]!=null?trBadge(t26[i]):'—'}</td><td class="tbl-r">${v25[i]>0?v25[i].toLocaleString('pt-BR'):'—'}</td><td class="tbl-r">${v26[i]!=null&&v26[i]>0?v26[i].toLocaleString('pt-BR'):'—'}</td></tr>`;}).join('');
+}
+
+// ══ VIDAS ══
+function renderVidas(){
+  const ontemISO=getOntemISO(),mesISO=getMesISO(ontemISO),ontemDisp=formatDia(ontemISO);
+  const lastM=realMensal.filter(r=>r.gmv>0).slice(-1)[0]||realMensal[realMensal.length-1];
+  const metaNovas=metaVidasNovas(lastM.m);
+  const vidasMesArr=vidasDia.filter(r=>r.mISO===mesISO);
+  const totalVidasMes=vidasMesArr.reduce((s,r)=>s+r.v,0);
+  const d1Vidas=vidasMesArr.find(r=>r.d===ontemDisp)||vidasMesArr.slice(-1)[0]||{v:0,d:'—'};
+  const pctV=(totalVidasMes/metaNovas*100).toFixed(1);
+  set('vidas2-total',(window._vidasTotal||95765).toLocaleString('pt-BR'));
+  set('vidas2-mes',totalVidasMes.toLocaleString('pt-BR'));set('sub-vidas2-mes',`Meta: ${metaNovas.toLocaleString('pt-BR')} · ${pctV}%`);
+  document.getElementById('bar-vidas2-mes').style.width=Math.min(pctV,100)+'%';
+  set('vidas2-d1',d1Vidas.v.toLocaleString('pt-BR'));
+  const pico=vidasMesArr.length>0?vidasMesArr.reduce((mx,r)=>r.v>mx.v?r:mx,{v:0,d:'—'}):{v:0,d:'—'};
+  set('sub-vidas2-pico',`Pico: ${pico.v.toLocaleString('pt-BR')} (${pico.d})`);
+  set('insight-pico',`${pico.d} (+${pico.v.toLocaleString('pt-BR')}) — maior dia do mês.`);
+  set('insight-warn-title',`Meta ${lastM.m} ${pctV}%:`);
+  const faltam=Math.max(metaNovas-totalVidasMes,0);
+  set('insight-warn-body',faltam>0?`Faltam ${faltam.toLocaleString('pt-BR')} vidas para bater a meta.`:`Meta batida!`);
+  const graf=vidasMesArr.length>0?vidasMesArr:vidasDia;
+  mkBar("c-vidas-mar",graf.map(d=>d.d),[{label:"Novas Vidas",data:graf.map(d=>d.v),backgroundColor:graf.map(d=>d.v>=500?"rgba(91,75,245,.85)":d.v>=200?"rgba(0,201,167,.7)":"rgba(0,201,167,.4)"),borderRadius:4}],{tip:v=>v.toLocaleString("pt-BR")+" vidas"});
+}
+
+// ══ TAKE RATE ══
+function renderTR(){
+  const mesesComDados=realMensal.filter(r=>r.tr>0);
+  mkLine("c-tr-mensal",mesesComDados.map(m=>m.m),[{label:"TR Mensal",data:mesesComDados.map(m=>m.tr),borderColor:"#5B4BF5",backgroundColor:"rgba(91,75,245,.1)",borderWidth:3,pointRadius:7,tension:.4,fill:true},{label:"Meta 8%",data:mesesComDados.map(()=>8),borderColor:"rgba(15,155,110,.5)",borderDash:[6,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{dom:[6,11],yf:v=>v+"%",tip:v=>f2(v)+"%"});
+  const ontemISO=getOntemISO(),mesISO=getMesISO(ontemISO);
+  const trMesArr=trDia.filter(r=>r.mISO===mesISO);const graf=trMesArr.length>0?trMesArr:trDia;
+  mkBar("c-tr-diario",graf.map(d=>d.d),[{label:"TR Total",data:graf.map(d=>d.tr),backgroundColor:graf.map(d=>d.tr>=8?"rgba(15,155,110,.7)":"rgba(229,62,62,.7)"),borderRadius:4},{label:"Meta 8%",data:graf.map(()=>8),type:"line",borderColor:"rgba(15,155,110,.5)",borderDash:[5,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{yf:v=>v+"%",tip:v=>f2(v)+"%"});
+  mkBar("c-tr-aereo-diario",graf.map(d=>d.d),[{label:"TR Aéreo",data:graf.map(d=>d.f>0?d.trf:null),backgroundColor:graf.map(d=>d.f>0?(d.trf>=7?"rgba(15,155,110,.7)":"rgba(229,62,62,.7)"):null),borderRadius:4},{label:"Meta 7%",data:graf.map(()=>7),type:"line",borderColor:"rgba(192,123,0,.6)",borderDash:[5,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{yf:v=>v+"%",tip:v=>v!=null?f2(v)+"%":"—"});
+  mkBar("c-tr-hotel-diario",graf.map(d=>d.d),[{label:"TR Hotel",data:graf.map(d=>d.h>0?d.trh:null),backgroundColor:graf.map(d=>d.h>0?(d.trh>=11?"rgba(15,155,110,.7)":"rgba(229,62,62,.7)"):null),borderRadius:4},{label:"Meta 11%",data:graf.map(()=>11),type:"line",borderColor:"rgba(0,201,167,.6)",borderDash:[5,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{yf:v=>v+"%",tip:v=>v!=null?f2(v)+"%":"—"});
+  const diasComBus=graf.filter(d=>d.b>0);
+  if(diasComBus.length>0){mkBar("c-tr-bus-diario",diasComBus.map(d=>d.d),[{label:"TR Ônibus",data:diasComBus.map(d=>d.trb),backgroundColor:diasComBus.map(d=>d.trb>=15?"rgba(15,155,110,.7)":"rgba(229,62,62,.7)"),borderRadius:4},{label:"Meta 15%",data:diasComBus.map(()=>15),type:"line",borderColor:"rgba(192,123,0,.6)",borderDash:[5,3],borderWidth:1.5,pointRadius:0,backgroundColor:"transparent"}],{yf:v=>v+"%",tip:v=>f2(v)+"%"});}else{const el=document.getElementById("c-tr-bus-diario");if(el){const ctx=el.getContext('2d');ctx.fillStyle=mC();ctx.font="13px Plus Jakarta Sans";ctx.textAlign="center";ctx.fillText("Sem emissões de ônibus no período",el.width/2,80);}}
+  document.getElementById("tbl-seg-tr").innerHTML=`<tr><td><span class="chip-f">Flight</span></td><td class="tbl-r">R$ 1.147.698</td><td class="tbl-r">—</td><td class="tbl-r">630</td><td class="tbl-r">—</td><td class="tbl-r">${trBadgeCustom(7.02,7)}</td><td class="tbl-r">—</td></tr><tr><td><span class="chip-h">Hotel</span></td><td class="tbl-r">R$ 877.735</td><td class="tbl-r">—</td><td class="tbl-r">742</td><td class="tbl-r">—</td><td class="tbl-r">${trBadgeCustom(11.13,11)}</td><td class="tbl-r">—</td></tr><tr><td><span class="chip-b">Bus</span></td><td class="tbl-r">R$ 3.936</td><td class="tbl-r">—</td><td class="tbl-r">13</td><td class="tbl-r">—</td><td class="tbl-r">${trBadgeCustom(17.75,15)}</td><td class="tbl-r">—</td></tr><tr class="tbl-tot"><td>Total</td><td class="tbl-r">R$ 2.089.719</td><td class="tbl-r">—</td><td class="tbl-r">1.385</td><td class="tbl-r">—</td><td class="tbl-r">${trBadge(8.82)}</td><td class="tbl-r">—</td></tr>`;
+  const trAno=mesesComDados.reduce((s,m)=>s+m.tr,0)/Math.max(mesesComDados.length,1);
+  set('tr-ano',f2(trAno)+'%');set('sub-tr-ano','Média Jan–Abr/26');
+}
+
+// ══ AÉREO ══
+function renderAereo(){
+  const top8=consolData.slice(0,8);
+  mkBar("c-consol",top8.map(c=>c.n),[{label:"Take Rate",data:top8.map(c=>c.tr),backgroundColor:top8.map(c=>c.tr>=7?"rgba(15,155,110,.7)":"rgba(229,62,62,.7)"),borderRadius:4}],{h:true,xf:v=>v+"%",tip:v=>f2(v)+"%"});
+  document.getElementById("tbl-consol").innerHTML=consolData.map(c=>`<tr><td>${c.n}</td><td class="tbl-r">${c.e}</td><td class="tbl-r">${fBRL(c.gmv)}</td><td class="tbl-r" style="color:${c.profit>0?"var(--green)":"var(--red)"}">${fBRL(c.profit)}</td><td class="tbl-r">${trBadgeCustom(c.tr,7)}</td><td class="tbl-r">${fBRL(c.tk)}</td></tr>`).join("");
+}
+
+// ══ HOTEL ══
+function renderHotel(){
+  mkBar("c-hotel-dest",hotelDest.map(d=>d.d.split(" - ")[0]),[{label:"Emissões",data:hotelDest.map(d=>d.e),backgroundColor:"rgba(0,201,167,.7)",borderRadius:4}],{h:true,tip:v=>v+" emissões"});
+  document.getElementById("tbl-hotel-dest").innerHTML=hotelDest.map((d,i)=>`<tr><td style="color:var(--muted)">${i+1}</td><td>${d.d}</td><td class="tbl-r">${d.e}</td><td class="tbl-r">${fBRL(d.gmv)}</td><td class="tbl-r">${trBadgeCustom(d.tr,11)}</td><td class="tbl-r">${fBRL(d.tk)}</td></tr>`).join("");
+  document.getElementById("tbl-hotel-fornec").innerHTML=hotelFornec.map((h,i)=>`<tr><td style="color:var(--muted)">${i+1}</td><td style="font-size:11px">${h.f}</td><td style="font-size:11px;color:var(--muted)">${h.c}</td><td class="tbl-r">${h.e}</td><td class="tbl-r">${fBRL(h.gmv)}</td><td class="tbl-r">${trBadgeCustom(h.tr,11)}</td><td class="tbl-r">${fBRL(h.tk)}</td></tr>`).join("");
+}
+
+// ══ EXCLUSIVAS ══
+function renderExcl(){
+  mkBar("c-excl-top10",exclTop10.map(h=>h.h.length>28?h.h.substring(0,28)+'…':h.h),[{label:"Emissões",data:exclTop10.map(h=>h.e),backgroundColor:"rgba(91,75,245,.75)",borderRadius:4}],{h:true,tip:v=>v+' emissões'});
+  document.getElementById('tbl-excl-top10').innerHTML=exclTop10.map((h,i)=>`<tr><td style="color:var(--muted);font-weight:700">${i+1}</td><td style="font-size:11px">${h.h}</td><td style="font-size:11px;color:var(--muted)">${h.c}</td><td class="tbl-r"><strong>${h.e}</strong></td><td class="tbl-r">${fBRL(h.gmv)}</td><td class="tbl-r">${trBadge(h.tr)}</td><td class="tbl-r">${fBRL(h.tk)}</td></tr>`).join('');
+  const menRev=[...exclMensal].reverse();
+  const mesLabels=menRev.map(m=>{const[y,mo]=m.m.split('-');const n={1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};return n[parseInt(mo)]+'/'+y.substring(2);});
+  mkBar("c-excl-mensal",mesLabels,[{label:"GMV",data:menRev.map(m=>m.gmv),backgroundColor:"rgba(91,75,245,.7)",borderRadius:4}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
+  document.getElementById('tbl-excl-mensal').innerHTML=exclMensal.map(m=>{const[y,mo]=m.m.split('-');const n={1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};const lab=n[parseInt(mo)]+'/'+y.substring(2);return`<tr><td style="font-weight:600">${lab}</td><td class="tbl-r">${m.e}</td><td class="tbl-r">${fBRL(m.gmv)}</td><td class="tbl-r" style="color:${m.profit>0?'var(--green)':'var(--red)'}">${fBRL(m.profit)}</td><td class="tbl-r">${trBadge(m.tr)}</td><td class="tbl-r">${fBRL(m.tk)}</td><td class="tbl-r" style="color:var(--muted)">${m.hoteis}</td></tr>`;}).join('');
+  document.getElementById('tbl-excl-detalhe').innerHTML=exclDetalhe.map(r=>{const[y,mo]=r.m.split('-');const n={1:'Jan',2:'Fev',3:'Mar',4:'Abr',5:'Mai',6:'Jun',7:'Jul',8:'Ago',9:'Set',10:'Out',11:'Nov',12:'Dez'};const lab=n[parseInt(mo)]+'/'+y.substring(2);return`<tr><td style="color:var(--muted);font-weight:600">${lab}</td><td style="font-size:11px">${r.h}</td><td style="font-size:11px;color:var(--muted)">${r.c}</td><td class="tbl-r">${r.e}</td><td class="tbl-r">${fBRL(r.gmv)}</td><td class="tbl-r" style="color:${r.profit>0?'var(--green)':'var(--red)'}">${fBRL(r.profit)}</td><td class="tbl-r">${trBadge(r.tr)}</td><td class="tbl-r">${fBRL(r.tk)}</td></tr>`;}).join('');
+}
+
+// ══ CUPONS ══
+function renderCupons(){
+  set('cup-d1-val',fBRL(cupD1.tot));set('cup-d1-sub',`${cupD1.qtot} cupons · ${cupD1.qmkt} MKT + ${cupD1.qprem} Prem.`);
+  set('cup-mes-val',fBRL(cupMesVig.tot));set('cup-mes-sub',`Abr/26 · ${cupMesVig.qtot} cupons`);
+  set('cup-ano-val',fBRL(cupAno.tot));set('cup-ano-sub',`${cupAno.qtot} cupons em 2026`);
+  const pctD1Mkt=(cupD1.mkt/cupD1.tot*100).toFixed(1),pctD1Prem=(cupD1.prem/cupD1.tot*100).toFixed(1);
+  const pctMesMkt=(cupMesVig.mkt/cupMesVig.tot*100).toFixed(1),pctMesPrem=(cupMesVig.prem/cupMesVig.tot*100).toFixed(1);
+  const pctAnoMkt=(cupAno.mkt/cupAno.tot*100).toFixed(1),pctAnoPrem=(cupAno.prem/cupAno.tot*100).toFixed(1);
+  set('share-d1-mkt',`${fBRL(cupD1.mkt)} (${pctD1Mkt}%)`);set('share-d1-prem',`${fBRL(cupD1.prem)} (${pctD1Prem}%)`);set('share-d1-tot',fBRL(cupD1.tot));
+  set('share-mes-mkt',`${fBRL(cupMesVig.mkt)} (${pctMesMkt}%)`);set('share-mes-prem',`${fBRL(cupMesVig.prem)} (${pctMesPrem}%)`);set('share-mes-tot',fBRL(cupMesVig.tot));
+  set('share-ano-mkt',`${fBRL(cupAno.mkt)} (${pctAnoMkt}%)`);set('share-ano-prem',`${fBRL(cupAno.prem)} (${pctAnoPrem}%)`);set('share-ano-tot',fBRL(cupAno.tot));
+  mkBar("c-cup-share-periodo",['D-1','Mês (Abr/26)','Ano 2026'],[{label:"MKT (Onhappy)",data:[cupD1.mkt,cupMesVig.mkt,cupAno.mkt],backgroundColor:"rgba(91,75,245,.75)",borderRadius:4},{label:"Premiação (Empresa)",data:[cupD1.prem,cupMesVig.prem,cupAno.prem],backgroundColor:"rgba(192,123,0,.75)",borderRadius:4}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
+  mkBar("c-cup-compare",["D-1","Mês","Ano 2026"],[{label:"MKT (Onhappy)",data:[cupD1.mkt,cupMesVig.mkt,cupAno.mkt],backgroundColor:"rgba(91,75,245,.75)",borderRadius:4},{label:"Premiação (Empresa)",data:[cupD1.prem,cupMesVig.prem,cupAno.prem],backgroundColor:"rgba(192,123,0,.75)",borderRadius:4}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
+  const mkt=cuponsBase.filter(r=>r.tipo==="MKT"),prem=cuponsBase.filter(r=>r.tipo==="Premiação");
+  document.getElementById("tbl-cup-ontem").innerHTML=[...mkt.filter(r=>r.qd>0).map(r=>`<tr><td>MKT</td><td style="color:var(--muted)">${r.ct}</td><td class="tbl-r">${r.qd}</td><td class="tbl-r">${fBRL(r.vd)}</td></tr>`),`<tr style="background:rgba(91,75,245,.04)"><td colspan="2"><strong>Subtotal MKT</strong></td><td class="tbl-r"><strong>${mkt.reduce((s,r)=>s+r.qd,0)}</strong></td><td class="tbl-r"><strong>${fBRL(mkt.reduce((s,r)=>s+r.vd,0))}</strong></td></tr>`,...prem.filter(r=>r.qd>0).map(r=>`<tr><td>Premiação</td><td style="color:var(--muted)">${r.ct}</td><td class="tbl-r">${r.qd}</td><td class="tbl-r">${fBRL(r.vd)}</td></tr>`),`<tr class="tbl-tot"><td colspan="2">TOTAL D-1</td><td class="tbl-r">${cuponsBase.reduce((s,r)=>s+r.qd,0)}</td><td class="tbl-r">${fBRL(cuponsBase.reduce((s,r)=>s+r.vd,0))}</td></tr>`].join("");
+  document.getElementById("tbl-cup-ano").innerHTML=[...mkt.map(r=>`<tr><td>MKT</td><td style="color:var(--muted)">${r.ct}</td><td class="tbl-r">${r.qa.toLocaleString("pt-BR")}</td><td class="tbl-r">${fBRL(r.va)}</td></tr>`),`<tr class="tbl-tot"><td colspan="2">TOTAL 2026</td><td class="tbl-r">${cuponsBase.reduce((s,r)=>s+r.qa,0).toLocaleString("pt-BR")}</td><td class="tbl-r">${fBRL(cuponsBase.reduce((s,r)=>s+r.va,0))}</td></tr>`].join("");
+  const tblMensal=document.getElementById("tbl-cup-mensal-body");
+  if(tblMensal){tblMensal.innerHTML='';cupMensal.forEach(m=>{tblMensal.innerHTML+=`<tr><td>${m.m}</td><td class="tbl-r">${fBRL(m.mkt)}</td><td class="tbl-r">${fBRL(m.prem)}</td><td class="tbl-r"><strong>${fBRL(m.tot)}</strong></td></tr>`;});const totMkt=cupMensal.reduce((s,m)=>s+m.mkt,0),totPrem=cupMensal.reduce((s,m)=>s+m.prem,0);tblMensal.innerHTML+=`<tr class="tbl-tot"><td>Total</td><td class="tbl-r">${fBRL(totMkt)}</td><td class="tbl-r">${fBRL(totPrem)}</td><td class="tbl-r">${fBRL(totMkt+totPrem)}</td></tr>`;}
+  mkBar("c-cup-mensal",cupMensal.map(m=>m.m),[{label:"MKT",data:cupMensal.map(m=>m.mkt),backgroundColor:"rgba(91,75,245,.75)",borderRadius:4},{label:"Premiação",data:cupMensal.map(m=>m.prem),backgroundColor:"rgba(192,123,0,.75)",borderRadius:4}],{yf:v=>fBRL(v),tip:v=>fBRL(v)});
+  document.getElementById("tbl-saldo-emp").innerHTML=saldoEmp.map((e,i)=>`<tr><td style="color:var(--muted)">${i+1}</td><td style="font-size:11px">${e.e}</td><td class="tbl-r">${e.c}</td><td class="tbl-r" style="font-weight:600;color:var(--amber)">${fBRL(e.s)}</td><td class="tbl-r">${fBRL(e.tk)}</td></tr>`).join("");
+}
+
+// ══ COMPRAS & COBERTURA ══
+function renderCompras(){
+  const ontemISO=getOntemISO(),mesISO=getMesISO(ontemISO);
+  const mesLabel=mesISO==='2026-04'?'Abr/26':mesISO==='2026-03'?'Mar/26':'Atual';
+  const segMes=emisSegMensal[mesLabel]||emisSegMensal['Abr/26'];
+  const totEmisAno=Object.values(emisSegMensal).reduce((s,m)=>s+(m.f||0)+(m.h||0)+(m.b||0),0);
+  const totEmisMes=(segMes.f||0)+(segMes.h||0)+(segMes.b||0);
+  const gmvMesVig=realMensal.find(r=>r.m===mesLabel)||realMensal.filter(r=>r.gmv>0).slice(-1)[0];
+  const tmMes=totEmisMes>0?Math.round((gmvMesVig?.gmv||0)/totEmisMes):0;
+  const d1=trDia.find(r=>r.mISO===mesISO&&r.d===formatDia(ontemISO))||trDia.filter(r=>r.mISO===mesISO).slice(-1)[0]||{ef:0,eh:0,eb:0};
+  const emisD1=(d1.ef||0)+(d1.eh||0)+(d1.eb||0);
+  set('comp-emis-ano',totEmisAno.toLocaleString('pt-BR'));set('comp-emis-mes',totEmisMes.toLocaleString('pt-BR'));
+  set('comp-emis-mes-sub',`${segMes.f} voos · ${segMes.h} hotel · ${segMes.b||0} ônibus`);
+  set('comp-emis-d1',emisD1.toLocaleString('pt-BR'));set('comp-tm-mes',fBRL(tmMes));
+  mkDoughnut("c-share-emis",[`Voos ${((segMes.f/totEmisMes)*100).toFixed(1)}%`,`Hotel ${((segMes.h/totEmisMes)*100).toFixed(1)}%`,segMes.b>0?`Ônibus ${((segMes.b/totEmisMes)*100).toFixed(1)}%`:null].filter(Boolean),[segMes.f,segMes.h,...(segMes.b>0?[segMes.b]:[])],["rgba(91,75,245,.8)","rgba(0,201,167,.8)","rgba(192,123,0,.8)"]);
+  const gmvF=gmvMesVig?.gmv*(segMes.f/totEmisMes)||0,gmvH=gmvMesVig?.gmv*(segMes.h/totEmisMes)||0;
+  mkDoughnut("c-share-gmv",[`Voos ${((gmvF/(gmvF+gmvH))*100).toFixed(1)}%`,`Hotel ${((gmvH/(gmvF+gmvH))*100).toFixed(1)}%`],[gmvF,gmvH],["rgba(91,75,245,.8)","rgba(0,201,167,.8)"]);
+  const mesesEmis=Object.entries(emisSegMensal);
+  mkBar("c-emis-hist",mesesEmis.map(([m])=>m),[{label:"Voos",data:mesesEmis.map(([,s])=>s.f),backgroundColor:"rgba(91,75,245,.75)",borderRadius:4},{label:"Hotel",data:mesesEmis.map(([,s])=>s.h),backgroundColor:"rgba(0,201,167,.65)",borderRadius:4},{label:"Ônibus",data:mesesEmis.map(([,s])=>s.b||0),backgroundColor:"rgba(192,123,0,.65)",borderRadius:4}],{tip:v=>v.toLocaleString('pt-BR')+' emissões'});
+  const tblEmis=document.getElementById('tbl-emis-hist');
+  if(tblEmis){tblEmis.innerHTML='';let totF=0,totH=0,totB=0,totGmv=0;mesesEmis.forEach(([mes,seg])=>{const rm=realMensal.find(r=>r.m===mes)||{gmv:0};const tot=(seg.f||0)+(seg.h||0)+(seg.b||0);const tm=tot>0?Math.round(rm.gmv/tot):0;totF+=seg.f||0;totH+=seg.h||0;totB+=seg.b||0;totGmv+=rm.gmv;tblEmis.innerHTML+=`<tr><td><strong>${mes}</strong></td><td class="tbl-r">${(seg.f||0).toLocaleString('pt-BR')}</td><td class="tbl-r">${(seg.h||0).toLocaleString('pt-BR')}</td><td class="tbl-r"><strong>${tot.toLocaleString('pt-BR')}</strong></td><td class="tbl-r">${fBRL(rm.gmv)}</td><td class="tbl-r">${tm>0?fBRL(tm):'—'}</td></tr>`;});const totTot=totF+totH+totB;tblEmis.innerHTML+=`<tr class="tbl-tot"><td>Total 2026</td><td class="tbl-r">${totF.toLocaleString('pt-BR')}</td><td class="tbl-r">${totH.toLocaleString('pt-BR')}</td><td class="tbl-r">${totTot.toLocaleString('pt-BR')}</td><td class="tbl-r">${fBRL(totGmv)}</td><td class="tbl-r">${totTot>0?fBRL(Math.round(totGmv/totTot)):'—'}</td></tr>`;}
+  const cobComCob=coberturaData.map(r=>({...r,cobertura:r.vidasAcum>0?(r.emis/r.vidasAcum*100):0}));
+  mkLine("c-cobertura",cobComCob.map(r=>r.label),[{label:"Cobertura (%)",data:cobComCob.map(r=>parseFloat(r.cobertura.toFixed(2))),borderColor:"#5B4BF5",backgroundColor:"rgba(91,75,245,.1)",borderWidth:2.5,pointRadius:cobComCob.map(r=>r.ano===2026?7:4),pointBackgroundColor:cobComCob.map(r=>r.ano===2026?"#5B4BF5":r.ano===2025?"#00C9A7":"#F6C344"),tension:.4,fill:true}],{yf:v=>v.toFixed(2)+'%',tip:v=>v.toFixed(2)+'%'});
+  const tblCob=document.getElementById('tbl-cobertura');
+  if(tblCob){tblCob.innerHTML='';cobComCob.forEach((r,i)=>{const prev=i>0?cobComCob[i-1]:null;const cob=r.cobertura;const varCob=prev?((cob-prev.cobertura)/Math.abs(prev.cobertura)*100).toFixed(1):null;tblCob.innerHTML+=`<tr><td><strong style="color:${r.ano===2026?'var(--accent)':r.ano===2025?'var(--a2)':'var(--amber)'}">${r.label}</strong></td><td class="tbl-r">${r.emis.toLocaleString('pt-BR')}</td><td class="tbl-r">${r.vidasAcum.toLocaleString('pt-BR')}</td><td class="tbl-r"><strong>${cob.toFixed(2)}%</strong></td><td class="tbl-r">${varCob!=null?`<span class="${parseFloat(varCob)>=0?'mom-up':'mom-dn'}">${parseFloat(varCob)>=0?'▲':'▼'} ${Math.abs(varCob)}%</span>`:'—'}</td></tr>`;});}
+}
+
+// ══ NAV ══
+const pR={daily:renderDaily,bignumbers:renderBigNumbers,metas:renderMetas,historico:renderHistorico,yoy:renderYoY,vidas:renderVidas,takerate:renderTR,'tr-aereo':renderAereo,'tr-hotel':renderHotel,'tr-excl':renderExcl,cupons:renderCupons,compras:renderCompras};
+const done=new Set();
+function nav(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);if(pg)pg.classList.add('active');
+  document.querySelectorAll('.nb').forEach(b=>{if(b.getAttribute('onclick')===`nav('${id}')`)b.classList.add('active');});
+  setTimeout(()=>{if(!done.has(id)&&pR[id]){pR[id]();done.add(id);}},60);
+}
+function stab(page,tab){
+  document.querySelectorAll(`#page-${page} .tp`).forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll(`#page-${page} .tb`).forEach(b=>b.classList.remove('active'));
+  const tp=document.getElementById(page+'-'+tab);if(tp)tp.classList.add('active');
+  event.target.classList.add('active');
+  const re={hist:renderHistorico,hotel:renderHotel,cupons:renderCupons,excl:renderExcl};
+  setTimeout(()=>{if(re[page])re[page]();},60);
+}
+function toggleTheme(){
+  const h=document.documentElement,isL=h.getAttribute('data-theme')==='light';
+  h.setAttribute('data-theme',isL?'dark':'light');
+  document.getElementById('th-tog').classList.toggle('on',isL);
+  document.getElementById('th-lbl').textContent=isL?'🌙 Modo Escuro':'☀️ Modo Claro';
+  setTimeout(()=>{done.forEach(id=>{if(pR[id])pR[id]();});},100);
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  renderDaily();
+  done.add('daily');
+  carregarDados(); // ← busca dados reais do Web App automaticamente
+});
+</script>
+</body>
+</html>
