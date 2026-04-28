@@ -608,6 +608,19 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
     </div>
   </div>
 
+  <!-- Nacional / Internacional -->
+  <div class="panel mb">
+    <div class="ptitle">🌎 Nacional vs Internacional</div>
+    <div class="g3" style="gap:10px">
+      <div><label class="inp-lbl">GMV Nacional (R$)</label><input class="inp-field" id="inp-gmv-nac" type="number" placeholder="0,00"></div>
+      <div><label class="inp-lbl">Prot. Nacional</label><input class="inp-field" id="inp-prot-nac" type="number" placeholder="0"></div>
+      <div><label class="inp-lbl">TR Nacional (%)</label><input class="inp-field" id="inp-tr-nac" type="number" step="0.01" placeholder="0,00"></div>
+      <div><label class="inp-lbl">GMV Internacional (R$)</label><input class="inp-field" id="inp-gmv-int" type="number" placeholder="0,00"></div>
+      <div><label class="inp-lbl">Prot. Internacional</label><input class="inp-field" id="inp-prot-int" type="number" placeholder="0"></div>
+      <div><label class="inp-lbl">TR Internacional (%)</label><input class="inp-field" id="inp-tr-int" type="number" step="0.01" placeholder="0,00"></div>
+    </div>
+  </div>
+
   <!-- Take Rate -->
   <div class="panel mb">
     <div class="ptitle">📈 Take Rate</div>
@@ -756,6 +769,22 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
       <span style="font-size:10px;background:var(--pink);color:var(--pink-d);padding:2px 8px;border-radius:6px;margin-left:6px">Meta: 2,75%</span>
     </div>
     <div style="position:relative;height:200px"><canvas id="c-funil-cob"></canvas></div>
+  </div>
+
+  <!-- CHART: GMV Nacional vs Internacional -->
+  <div class="panel mb">
+    <div class="ptitle">🌎 GMV Diário — Nacional vs Internacional
+      <span style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Preencher no Input Diário</span>
+    </div>
+    <div style="position:relative;height:220px"><canvas id="c-nac-int-gmv"></canvas></div>
+  </div>
+
+  <!-- CHART: Take Rate Nacional vs Internacional -->
+  <div class="panel mb">
+    <div class="ptitle">📊 Take Rate — Nacional vs Internacional
+      <span style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Preencher no Input Diário</span>
+    </div>
+    <div style="position:relative;height:200px"><canvas id="c-nac-int-tr"></canvas></div>
   </div>
 
   <!-- Tabela diária -->
@@ -1479,6 +1508,8 @@ function inputSave(){
     gmv_off_aereo:g('inp-gmv-off-aereo'),prot_off_aereo:g('inp-prot-off-aereo'),
     gmv_off_hotel:g('inp-gmv-off-hotel'),prot_off_hotel:g('inp-prot-off-hotel'),
     saldo_mkt:g('inp-saldo-mkt'),saldo_prem:g('inp-saldo-prem'),
+    gmv_nac:g('inp-gmv-nac'),prot_nac:g('inp-prot-nac'),tr_nac:g('inp-tr-nac'),
+    gmv_int:g('inp-gmv-int'),prot_int:g('inp-prot-int'),tr_int:g('inp-tr-int'),
     tr_total:g('inp-tr-total'),tr_aereo:g('inp-tr-aereo'),tr_hotel:g('inp-tr-hotel'),tr_outros:g('inp-tr-outros'),
     sessoes:g('inp-sessoes'),visualiz:g('inp-visualiz'),buscas:g('inp-buscas'),
     carrinhos:g('inp-carrinho'),abandono:g('inp-abandono'),vidas:g('inp-vidas'),
@@ -1503,7 +1534,8 @@ function inputClearFields(){
   ['inp-gmv-aereo','inp-prot-aereo','inp-gmv-hotel','inp-prot-hotel','inp-gmv-outros','inp-prot-outros',
    'inp-gmv-off-aereo','inp-prot-off-aereo','inp-gmv-off-hotel','inp-prot-off-hotel',
    'inp-saldo-mkt','inp-saldo-prem','inp-tr-total','inp-tr-aereo','inp-tr-hotel','inp-tr-outros',
-   'inp-sessoes','inp-visualiz','inp-buscas','inp-carrinho','inp-abandono','inp-vidas'
+   'inp-sessoes','inp-visualiz','inp-buscas','inp-carrinho','inp-abandono','inp-vidas',
+   'inp-gmv-nac','inp-prot-nac','inp-tr-nac','inp-gmv-int','inp-prot-int','inp-tr-int'
   ].forEach(id=>{const e=getEl(id);if(e)e.value='';});
   const yd=new Date();yd.setDate(yd.getDate()-1);
   const d=getEl('inp-data');if(d)d.value=yd.toISOString().slice(0,10);
@@ -1519,6 +1551,8 @@ function inputEdit(data){
   ['total','aereo','hotel','outros'].forEach(k=>set('inp-tr-'+k,'tr_'+k));
   set('inp-sessoes','sessoes');set('inp-visualiz','visualiz');set('inp-buscas','buscas');
   set('inp-carrinho','carrinhos');set('inp-abandono','abandono');set('inp-vidas','vidas');
+  set('inp-gmv-nac','gmv_nac');set('inp-prot-nac','prot_nac');set('inp-tr-nac','tr_nac');
+  set('inp-gmv-int','gmv_int');set('inp-prot-int','prot_int');set('inp-tr-int','tr_int');
   nav('input-diario');setTimeout(()=>getEl('inp-data').scrollIntoView({behavior:'smooth',block:'start'}),100);
 }
 
@@ -1605,26 +1639,74 @@ function renderFunil(){
     {label:'Hotel',data:hotArr,backgroundColor:'rgba(0,201,167,.85)',stack:'s'},
     {label:'Outros',data:outArr,backgroundColor:'rgba(246,195,68,.85)',stack:'s'},
     {label:'Off/Cupom',data:offArr,backgroundColor:'rgba(229,62,62,.7)',stack:'s',borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0}},
-  ];
-  if(hasTr){
-    dsModal.push({label:'TR Total %',data:trTArr,type:'line',borderColor:'#FF6B6B',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2});
-    if(trAArr.some(v=>v))dsModal.push({label:'TR Aéreo %',data:trAArr,type:'line',borderColor:'#FF9F43',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderDash:[3,3],borderWidth:1.5});
-    if(trHArr.some(v=>v))dsModal.push({label:'TR Hotel %',data:trHArr,type:'line',borderColor:'#26de81',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderDash:[3,3],borderWidth:1.5});
-  }
+    {label:'TR Total %',data:trTArr,type:'line',borderColor:'#FF6B6B',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
+    {label:'TR Aéreo %',data:trAArr,type:'line',borderColor:'#FF9F43',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderDash:[3,3],borderWidth:1.5},
+    {label:'TR Hotel %',data:trHArr,type:'line',borderColor:'#26de81',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderDash:[3,3],borderWidth:1.5},
+  ].filter(ds=>ds.type==='bar'||(ds.data&&ds.data.some(v=>v)));
+
   buildChart('c-gmv-modal','gmv_modal',{
     type:'bar',data:{labels,datasets:dsModal},
     options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.dataset.yAxisID==='y1'?ctx.raw?.toFixed(2)+'%':fmtR(ctx.raw||0))}}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.dataset.yAxisID==='y1'?ctx.raw?.toFixed(2)+'%':fmtR(ctx.raw||0))}}
+      },
       scales:{
         x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
         y:{stacked:true,ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}},
-        y1:{position:'right',display:hasTr,ticks:{color:'#FF6B6B',font:{size:9},callback:v=>v+'%'},grid:{display:false}}
+        y1:{position:'right',ticks:{color:'#FF6B6B',font:{size:9},callback:v=>v?v.toFixed(1)+'%':''},grid:{display:false},min:0,max:25}
       }
     }
   });
 
-  // CHART 2: GMV + Funil
+  // ── CHARTS Nacional vs Internacional ──────────────────────────────────────
+  const nacGmvArr = bq.map(r=>mmap[r.data]?.gmv_nac||null);
+  const intGmvArr = bq.map(r=>mmap[r.data]?.gmv_int||null);
+  const nacTrArr  = bq.map(r=>mmap[r.data]?.tr_nac||null);
+  const intTrArr  = bq.map(r=>mmap[r.data]?.tr_int||null);
+  const shareNacArr = bq.map((_,i)=>{
+    const n=nacGmvArr[i]||0, t=(nacGmvArr[i]||0)+(intGmvArr[i]||0);
+    return t>0?Math.round(n/t*100):null;
+  });
+
+  buildChart('c-nac-int-gmv','nac_int_gmv',{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'Nacional (R$)',data:nacGmvArr,backgroundColor:'rgba(91,75,245,.8)',stack:'s',borderRadius:{topLeft:0,topRight:0,bottomLeft:3,bottomRight:3},spanGaps:true},
+      {label:'Internacional (R$)',data:intGmvArr,backgroundColor:'rgba(0,201,167,.8)',stack:'s',borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0},spanGaps:true},
+      {label:'% Share Nacional',data:shareNacArr,type:'line',borderColor:'#F6C344',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.dataset.yAxisID==='y1'?(ctx.raw||0)+'%':fmtR(ctx.raw||0))}}
+      },
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
+        y:{stacked:true,ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}},
+        y1:{position:'right',min:0,max:100,ticks:{color:'#F6C344',font:{size:9},callback:v=>v+'%'},grid:{display:false}}
+      }
+    }
+  });
+
+  buildChart('c-nac-int-tr','nac_int_tr',{
+    type:'line',
+    data:{labels,datasets:[
+      {label:'TR Nacional %',data:nacTrArr,borderColor:'rgba(91,75,245,.9)',backgroundColor:'rgba(91,75,245,.1)',pointRadius:0,tension:.3,spanGaps:true,borderWidth:2,fill:true},
+      {label:'TR Internacional %',data:intTrArr,borderColor:'rgba(0,201,167,.9)',backgroundColor:'rgba(0,201,167,.1)',pointRadius:0,tension:.3,spanGaps:true,borderWidth:2,fill:true},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.raw||0).toFixed(2)+'%'}}
+      },
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
+        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>v+'%'},grid:{color:'var(--faint)'},min:0}
+      }
+    }
+  });
+
+    // CHART 2: GMV + Funil
   const busArr=bq.map(r=>mmap[r.data]?.buscas||null);
   const carArr=bq.map(r=>mmap[r.data]?.carrinhos||null);
   buildChart('c-gmv-funil','gmv_funil',{
