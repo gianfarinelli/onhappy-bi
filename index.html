@@ -1691,6 +1691,53 @@ function renderFunil(){
   const trHArr=mArr.map(m=>m?.tr_hotel||null);
   const hasTr=trTArr.some(v=>v);
 
+  // CHART: GMV Diário (c-funil-gmv) — barras + meta
+  const metaArr = bq.map(r => DAILY_META_BY_MONTH[r.data.slice(0,7)] || null);
+  buildChart('c-funil-gmv','gmv_daily',{
+    type:'bar',
+    data:{labels, datasets:[
+      {label:'GMV (R$)',data:bq.map(r=>r.gmv),
+        backgroundColor:bq.map((r,i)=>(metaArr[i]&&r.gmv>=metaArr[i])
+          ?'rgba(15,155,110,.8)':'rgba(91,75,245,.75)'),
+        borderRadius:3,borderSkipped:false,order:2},
+      {label:'Meta diária',data:metaArr,type:'line',
+        borderColor:'rgba(246,195,68,.9)',backgroundColor:'transparent',
+        borderDash:[5,4],borderWidth:1.5,pointRadius:0,spanGaps:true,order:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtR(ctx.raw)}}},
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
+        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}}
+      }
+    }
+  });
+
+  // CHART: GMV x Funil Conversão (c-gmv-funil)
+  const busArr=bq.map(r=>mmap[r.data]?.buscas||null);
+  const carArr=bq.map(r=>mmap[r.data]?.carrinhos||null);
+  buildChart('c-gmv-funil','gmv_funil',{
+    type:'bar',
+    data:{labels,datasets:[
+      {label:'GMV (R$)',data:bq.map(r=>r.gmv),backgroundColor:'rgba(91,75,245,.55)',yAxisID:'y',borderRadius:3,borderSkipped:false},
+      {label:'Buscas',data:busArr,type:'line',borderColor:'rgba(0,201,167,.9)',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
+      {label:'Carrinhos',data:carArr,type:'line',borderColor:'rgba(246,195,68,.9)',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
+      {label:'Compras (BQ)',data:bq.map(r=>r.p),type:'line',borderColor:'rgba(229,62,62,.9)',backgroundColor:'transparent',pointRadius:1,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}}},
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
+        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}},
+        y1:{position:'right',ticks:{color:'var(--muted)',font:{size:9}},grid:{display:false}}
+      }
+    }
+  });
+
+  
+
+
   const dsModal=[
     {label:'Aéreo',data:aerArr,backgroundColor:'rgba(91,75,245,.85)',stack:'s',borderRadius:{topLeft:0,topRight:0,bottomLeft:3,bottomRight:3}},
     {label:'Hotel',data:hotArr,backgroundColor:'rgba(0,201,167,.85)',stack:'s'},
@@ -1955,50 +2002,7 @@ function renderConvBoxes() {
   // Convperiodo tabs precisam que convDays seja acessível globalmente
   window.convPeriodo = convPeriodo;
 })();
+
 </script>
 </body>
-</html  // CHART: GMV Diário (c-funil-gmv) — barras + meta
-  const metaArr = bq.map(r => DAILY_META_BY_MONTH[r.data.slice(0,7)] || null);
-  buildChart('c-funil-gmv','gmv_daily',{
-    type:'bar',
-    data:{labels, datasets:[
-      {label:'GMV (R$)',data:bq.map(r=>r.gmv),
-        backgroundColor:bq.map((r,i)=>(metaArr[i]&&r.gmv>=metaArr[i])
-          ?'rgba(15,155,110,.8)':'rgba(91,75,245,.75)'),
-        borderRadius:3,borderSkipped:false,order:2},
-      {label:'Meta diária',data:metaArr,type:'line',
-        borderColor:'rgba(246,195,68,.9)',backgroundColor:'transparent',
-        borderDash:[5,4],borderWidth:1.5,pointRadius:0,spanGaps:true,order:1}
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtR(ctx.raw)}}},
-      scales:{
-        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
-        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}}
-      }
-    }
-  });
-
-  // CHART: GMV x Funil Conversão (c-gmv-funil)
-  const busArr=bq.map(r=>mmap[r.data]?.buscas||null);
-  const carArr=bq.map(r=>mmap[r.data]?.carrinhos||null);
-  buildChart('c-gmv-funil','gmv_funil',{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'GMV (R$)',data:bq.map(r=>r.gmv),backgroundColor:'rgba(91,75,245,.55)',yAxisID:'y',borderRadius:3,borderSkipped:false},
-      {label:'Buscas',data:busArr,type:'line',borderColor:'rgba(0,201,167,.9)',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
-      {label:'Carrinhos',data:carArr,type:'line',borderColor:'rgba(246,195,68,.9)',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
-      {label:'Compras (BQ)',data:bq.map(r=>r.p),type:'line',borderColor:'rgba(229,62,62,.9)',backgroundColor:'transparent',pointRadius:1,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}}},
-      scales:{
-        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
-        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}},
-        y1:{position:'right',ticks:{color:'var(--muted)',font:{size:9}},grid:{display:false}}
-      }
-    }
-  });
-
-  >
+</html>
