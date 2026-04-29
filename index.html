@@ -156,7 +156,7 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
 <div class="s-sec">
   <span class="s-lbl">B2C</span>
   <button class="nb" onclick="nav('input-diario')"><span>📥</span> Input Diário</button>
-  <button class="nb" onclick="nav('funil')"><span>🔄</span> Funil & Cobertura</button>
+  <button class="nb" onclick="nav('funil')"><span>🔄</span> Funil</button>
 </div>
 
 </nav>
@@ -671,8 +671,8 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
 <div id="page-funil" class="page">
   <div class="ph">
     <div>
-      <div class="pt">🔄 Funil & Cobertura</div>
-      <div class="ps">Dados reais do BigQuery · Mai/2025 → hoje</div>
+      <div class="pt">🔄 Funil</div>
+      <div class="ps">Dados reais do BigQuery · Mar/2024 → hoje</div>
     </div>
     <div class="tab-bar" style="margin-bottom:0">
       <button class="tb active" onclick="funilPeriodo('30',this)">30 dias</button>
@@ -759,6 +759,22 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
   </div>
 
   <!-- Cobertura -->
+  <!-- FUNIL DE ENGAJAMENTO (Sessões → Buscas → Carrinhos → Compras) -->
+  <div class="panel mb">
+    <div class="ptitle">📊 Funil de Engajamento
+      <span style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Jan–Abr/26 · ENG_HIST planilha</span>
+    </div>
+    <div style="position:relative;height:220px"><canvas id="c-funil-eng-chart"></canvas></div>
+  </div>
+
+  <!-- FUNIL DE USUÁRIOS (Elegíveis → Ativos → Compradores → 3+) -->
+  <div class="panel mb">
+    <div class="ptitle">👥 Funil de Usuários
+      <span style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">Histórico completo · BQ real</span>
+    </div>
+    <div style="position:relative;height:220px"><canvas id="c-funil-users-chart"></canvas></div>
+  </div>
+
   <div class="panel mb">
     <div class="ptitle">🎯 Cobertura Mensal <span>(Protocolos ÷ Vidas Ativas)</span>
       <span style="font-size:10px;background:var(--pink);color:var(--pink-d);padding:2px 8px;border-radius:6px;margin-left:6px">Meta: 2,75%</span>
@@ -1490,7 +1506,7 @@ const VIDAS_CUM=(function(){
   return c;
 })();
 
-// All-time KPIs (para os boxes de Funil & Cobertura)
+// All-time KPIs (para os boxes de Funil)
 const ALL_TIME={gmv:30768619.38,prot:24323,cu:10761,tm:1265.0};
 
 (function(){const s=document.createElement('style');s.textContent=`
@@ -1849,6 +1865,103 @@ function renderFunil(){
       }
     }
   });
+
+  // ── FUNIL DE ENGAJAMENTO (dados do ENG_HIST — Jan–Abr/26) ─────────────────
+  (function() {
+    // Agregar totais do ENG_HIST para o período filtrado
+    const engKeys = Object.keys(ENG_HIST);
+    const engFiltKeys = bq.map(r=>r.data).filter(d=>ENG_HIST[d]);
+    const totS = engFiltKeys.reduce((a,d)=>a+(ENG_HIST[d].sessoes||0),0);
+    const totB = engFiltKeys.reduce((a,d)=>a+(ENG_HIST[d].buscas||0),0);
+    const totC = engFiltKeys.reduce((a,d)=>a+(ENG_HIST[d].carrinhos||0),0);
+    // Compras vêm sempre do BQ (soma do período filtrado)
+    const totP = bq.reduce((a,r)=>a+r.p,0);
+    // Também incluir input manual
+    const mmap3 = getManualMap();
+    const mKeys = bq.map(r=>r.data).filter(d=>mmap3[d]&&(mmap3[d].sessoes||mmap3[d].buscas||mmap3[d].carrinhos));
+    const mS = mKeys.reduce((a,d)=>a+(mmap3[d].sessoes||0),0);
+    const mB = mKeys.reduce((a,d)=>a+(mmap3[d].buscas||0),0);
+    const mC = mKeys.reduce((a,d)=>a+(mmap3[d].carrinhos||0),0);
+    const fS = totS+mS, fB = totB+mB, fC = totC+mC;
+
+    const steps = [
+      {label:'Sessões',    val:fS,   color:'rgba(91,75,245,.85)'},
+      {label:'Buscas',     val:fB,   color:'rgba(0,150,220,.85)'},
+      {label:'Carrinhos',  val:fC,   color:'rgba(246,195,68,.85)'},
+      {label:'Compras',    val:totP, color:'rgba(15,155,110,.85)'},
+    ];
+
+    const pct = (v,t) => t>0 ? ' ('+Math.round(v/t*100)+'%)' : '';
+    const labels2 = steps.map((s,i) => i===0 ? s.label : s.label+pct(s.val,steps[0].val));
+    const vals    = steps.map(s=>s.val);
+    const colors  = steps.map(s=>s.color);
+
+    buildChart('c-funil-eng-chart','funil_eng',{
+      type:'bar',
+      data:{labels:labels2, datasets:[{
+        label:'Volume',data:vals,backgroundColor:colors,
+        borderRadius:6,borderSkipped:false,
+      }]},
+      options:{
+        indexAxis:'y',
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{
+            label:ctx=>' '+fmtN(ctx.raw)+
+              (ctx.dataIndex>0?' ('+Math.round(ctx.raw/vals[0]*100)+'% do topo)':'')
+          }}
+        },
+        scales:{
+          x:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>fmtN(v)},grid:{color:'var(--faint)'}},
+          y:{ticks:{color:'var(--text)',font:{size:10,weight:'600'}},grid:{display:false}}
+        }
+      }
+    });
+  })();
+
+  // ── FUNIL DE USUÁRIOS (BQ real — histórico completo) ──────────────────────
+  (function() {
+    const elegiveis       = 710489;
+    const ativos          = 97345;
+    const compradores     = 12367;
+    const compradores_3p  = 2224;
+
+    const steps = [
+      {label:'Elegíveis',    val:elegiveis,      color:'rgba(91,75,245,.7)'},
+      {label:'Ativos',       val:ativos,         color:'rgba(91,75,245,.82)'},
+      {label:'Compradores únicos', val:compradores, color:'rgba(0,201,167,.85)'},
+      {label:'3+ compras',   val:compradores_3p, color:'rgba(15,155,110,.9)'},
+    ];
+
+    const pct = (v,t) => t>0?' ('+Math.round(v/t*100)+'%)':'' ;
+    const labels3 = steps.map((s,i) => i===0 ? s.label : s.label+pct(s.val,steps[0].val));
+    const vals    = steps.map(s=>s.val);
+    const colors  = steps.map(s=>s.color);
+
+    buildChart('c-funil-users-chart','funil_users',{
+      type:'bar',
+      data:{labels:labels3, datasets:[{
+        label:'Usuários',data:vals,backgroundColor:colors,
+        borderRadius:6,borderSkipped:false,
+      }]},
+      options:{
+        indexAxis:'y',
+        responsive:true, maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{
+            label:ctx=>' '+fmtN(ctx.raw)+
+              (ctx.dataIndex>0?' ('+Math.round(ctx.raw/vals[0]*100)+'% dos elegíveis)':'')
+          }}
+        },
+        scales:{
+          x:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>fmtN(v)},grid:{color:'var(--faint)'}},
+          y:{ticks:{color:'var(--text)',font:{size:10,weight:'600'}},grid:{display:false}}
+        }
+      }
+    });
+  })();
 
   // CHART 3: Cobertura mensal
   buildChart('c-funil-cob','cob',{
