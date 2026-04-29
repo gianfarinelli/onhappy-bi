@@ -766,7 +766,7 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
     <!-- FUNIL DE ENGAJAMENTO -->
     <div class="panel">
       <div class="ptitle">📊 Funil de Engajamento
-        <span style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Jan–Abr/26</span>
+        <span id="funil-eng-label" style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Abr/26</span>
       </div>
       <div id="funil-eng-svg" style="width:100%;padding:4px 0;min-height:290px"></div>
     </div>
@@ -1831,20 +1831,33 @@ function renderFunil(){
     el.innerHTML = svg;
   }
 
-  // Funil Engajamento
+  // Funil Engajamento — sempre mês vigente
   (function() {
-    const mmap3 = Object.assign({}, ENG_HIST, getManualMap());
-    const engFiltKeys = bq.map(r=>r.data).filter(d=>mmap3[d]&&(mmap3[d].sessoes||mmap3[d].buscas));
-    const totS = engFiltKeys.reduce((a,d)=>a+(mmap3[d].sessoes||0),0);
-    const totB = engFiltKeys.reduce((a,d)=>a+(mmap3[d].buscas||0),0);
-    const totC = engFiltKeys.reduce((a,d)=>a+(mmap3[d].carrinhos||0),0);
-    const totP = bq.reduce((a,r)=>a+r.p,0);
+    // Mês vigente = mês atual ou Abr/26 como fallback
+    const hoje   = new Date().toISOString().slice(0,7);
+    const mmap3  = Object.assign({}, ENG_HIST, getManualMap());
+    // BQ do mês vigente
+    const bqMes  = BQ_DAILY.filter(r => r.data.startsWith(hoje));
+    const bqUsar = bqMes.length >= 3 ? bqMes : BQ_DAILY.filter(r => r.data.startsWith('2026-04'));
+    const mesLabel = bqUsar[0]?.data?.slice(0,7)
+      .replace(/(\d{4})-(\d{2})/, (_,y,m)=>({'01':'Jan','02':'Fev','03':'Mar','04':'Abr','05':'Mai','06':'Jun','07':'Jul','08':'Ago','09':'Set','10':'Out','11':'Nov','12':'Dez'}[m]+'/'+y.slice(2)));
+
+    // Engajamento do mês vigente (ENG_HIST + Input manual)
+    const engKeys = bqUsar.map(r=>r.data).filter(d=>mmap3[d]&&(mmap3[d].sessoes||mmap3[d].buscas||mmap3[d].carrinhos));
+    const totS = engKeys.reduce((a,d)=>a+(mmap3[d].sessoes||0),0);
+    const totB = engKeys.reduce((a,d)=>a+(mmap3[d].buscas||0),0);
+    const totC = engKeys.reduce((a,d)=>a+(mmap3[d].carrinhos||0),0);
+    const totP = bqUsar.reduce((a,r)=>a+r.p, 0); // compras do BQ
+
+    // Atualizar label do painel
+    const lbl = document.getElementById('funil-eng-label');
+    if(lbl && mesLabel) lbl.textContent = mesLabel;
 
     drawFunnelSVG('funil-eng-svg', [
-      {label:'Sessões',   val:totS, fmtVal:fmtN(totS)},
-      {label:'Buscas',    val:totB, fmtVal:fmtN(totB)},
-      {label:'Carrinhos', val:totC, fmtVal:fmtN(totC)},
-      {label:'Compras',   val:totP, fmtVal:fmtN(totP)},
+      {label:'Sessões',   val:totS||1, fmtVal:totS?fmtN(totS):'—'},
+      {label:'Buscas',    val:totB||0, fmtVal:totB?fmtN(totB):'—'},
+      {label:'Carrinhos', val:totC||0, fmtVal:totC?fmtN(totC):'—'},
+      {label:'Compras',   val:totP||0, fmtVal:totP?fmtN(totP):'—'},
     ]);
   })();
 
