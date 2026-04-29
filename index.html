@@ -768,7 +768,7 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
       <div class="ptitle">📊 Funil de Engajamento
         <span style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Jan–Abr/26</span>
       </div>
-      <div id="funil-eng-svg" style="width:100%;padding:8px 0"></div>
+      <div id="funil-eng-svg" style="width:100%;padding:4px 0;min-height:290px"></div>
     </div>
 
     <!-- FUNIL DE USUÁRIOS -->
@@ -776,7 +776,7 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
       <div class="ptitle">👥 Funil de Usuários
         <span style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">BQ real · histórico</span>
       </div>
-      <div id="funil-users-svg" style="width:100%;padding:8px 0"></div>
+      <div id="funil-users-svg" style="width:100%;padding:4px 0;min-height:290px"></div>
     </div>
 
   </div>
@@ -1767,50 +1767,64 @@ function renderFunil(){
   // ── FUNÇÃO drawFunnelSVG ────────────────────────────────────────────────────
   function drawFunnelSVG(containerId, steps) {
     const el = document.getElementById(containerId);
-    if(!el) return;
-    const isDark = document.documentElement.getAttribute('data-theme')==='dark';
-    const n      = steps.length;
-    const maxVal = steps[0].val;
-    const W      = Math.max(el.offsetWidth || 360, 280);
-    const slotH  = 62;
-    const gap    = 2;
-    const H      = n * (slotH + gap) + 8;
-    // Funnel shape: top bar = 90% width, bottom bar = 28% width
-    const maxW   = W * 0.90;
-    const minW   = W * 0.28;
-    const labelX = 8;
+    if (!el) return;
+    const isDark  = document.documentElement.getAttribute('data-theme') === 'dark';
+    const n       = steps.length;
+    const maxVal  = steps[0].val;
+    const totalW  = Math.max(el.offsetWidth || 380, 300);
+    const LABEL_W = 144;
+    const GAP     = 8;
+    const funnelW = totalW - LABEL_W - GAP;
+    const rowH    = 62;
+    const stepGap = 3;
+    const H       = n * rowH + (n - 1) * stepGap + 4;
+    const fMax    = funnelW * 0.96;
+    const fMin    = funnelW * 0.26;
+    const fOffX   = LABEL_W + GAP;
 
-    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block">`;
+    const palettes = [
+      {fill:'rgba(91,75,245,.65)',  stroke:'rgba(91,75,245,.85)'},
+      {fill:'rgba(30,144,212,.65)', stroke:'rgba(30,144,212,.85)'},
+      {fill:'rgba(192,123,0,.65)',  stroke:'rgba(192,123,0,.85)'},
+      {fill:'rgba(15,155,110,.65)', stroke:'rgba(15,155,110,.85)'},
+    ];
 
-    // System palette: accent→a2→amber→green gradient
-    const palette = ['#5B4BF5','#1E90D4','#E6A817','#0F9B6E'];
+    const labelColor = isDark ? '#C4C0EE' : '#3D3B6E';
+    const mutedColor = isDark ? '#9B94CC' : '#8078B0';
+
+    let svg = `<svg viewBox="0 0 ${totalW} ${H}" width="100%" style="display:block;overflow:visible">`;
+    svg += `<defs><filter id="fs${containerId}"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="rgba(0,0,0,.10)"/></filter></defs>`;
 
     steps.forEach((s, i) => {
+      const p     = palettes[i % palettes.length];
       const ratio = maxVal > 0 ? s.val / maxVal : 0;
-      const curW  = minW + (maxW - minW) * ratio;
-      const prevW = i === 0 ? curW : minW + (maxW - minW) * (steps[i-1].val/maxVal);
-      const topX  = (W - prevW) / 2;
-      const botX  = (W - curW)  / 2;
-      const y     = i * (slotH + gap);
-      const color = s.color || palette[i % palette.length];
-      const pts   = `${topX},${y} ${topX+prevW},${y} ${botX+curW},${y+slotH} ${botX},${y+slotH}`;
+      const prevR = i === 0 ? ratio : (maxVal > 0 ? steps[i-1].val / maxVal : 0);
+      const curW  = fMin + (fMax - fMin) * ratio;
+      const prevW = fMin + (fMax - fMin) * prevR;
+      const y     = i * (rowH + stepGap);
+      const topX  = fOffX + (funnelW - prevW) / 2;
+      const botX  = fOffX + (funnelW - curW)  / 2;
+      const cy    = y + rowH / 2;
+      const pts   = `${topX},${y} ${topX+prevW},${y} ${botX+curW},${y+rowH} ${botX},${y+rowH}`;
 
-      svg += `<polygon points="${pts}" fill="${color}"/>`;
+      svg += `<polygon points="${pts}" fill="${p.fill}" stroke="${p.stroke}" stroke-width="1" filter="url(#fs${containerId})"/>`;
 
-      // Label (left of bar, in muted text color)
-      const pctTxt = i === 0 ? '' : ' · ' + Math.round(s.val/maxVal*100) + '%';
-      const labelY = y + slotH/2 + 4;
-      svg += `<text x="${labelX}" y="${labelY}" `+
-             `font-size="11" font-weight="700" font-family="Arial, sans-serif" `+
-             `fill="${isDark?'#C4C0EE':'#3D3B6E'}">`+
-             `${s.label}${pctTxt}</text>`;
+      // Value centered in bar
+      svg += `<text x="${fOffX + funnelW/2}" y="${cy + 5}" font-size="14" font-weight="800" font-family="Arial,sans-serif" fill="#fff" text-anchor="middle">${s.fmtVal}</text>`;
 
-      // Value (centered inside bar, white bold)
-      const cx = W / 2;
-      const cy = y + slotH / 2 + 4;
-      svg += `<text x="${cx}" y="${cy}" `+
-             `font-size="14" font-weight="800" font-family="Arial, sans-serif" `+
-             `fill="#fff" text-anchor="middle">${s.fmtVal}</text>`;
+      // Dashed connector
+      const lineX2 = topX - 4;
+      if (lineX2 > LABEL_W + 4) {
+        svg += `<line x1="${LABEL_W}" y1="${cy}" x2="${lineX2}" y2="${cy}" stroke="${mutedColor}" stroke-width="1" stroke-dasharray="3,3" opacity="0.5"/>`;
+      }
+
+      // Label name (right-aligned)
+      const pctTxt = i === 0 ? '' : String(Math.round(s.val / maxVal * 100)) + '%';
+      const nameY  = pctTxt ? cy - 5 : cy + 4;
+      svg += `<text x="${LABEL_W - 8}" y="${nameY}" font-size="11" font-weight="700" font-family="Arial,sans-serif" fill="${labelColor}" text-anchor="end">${s.label}</text>`;
+      if (pctTxt) {
+        svg += `<text x="${LABEL_W - 8}" y="${cy + 11}" font-size="10" font-weight="600" font-family="Arial,sans-serif" fill="${mutedColor}" text-anchor="end">${pctTxt}</text>`;
+      }
     });
 
     svg += '</svg>';
@@ -1827,19 +1841,19 @@ function renderFunil(){
     const totP = bq.reduce((a,r)=>a+r.p,0);
 
     drawFunnelSVG('funil-eng-svg', [
-      {label:'Sessões',   val:totS, color:'var(--accent)',    fmtVal:fmtN(totS)},
-      {label:'Buscas',    val:totB, color:'#1E90D4',          fmtVal:fmtN(totB)},
-      {label:'Carrinhos', val:totC, color:'var(--amber)',     fmtVal:fmtN(totC)},
-      {label:'Compras',   val:totP, color:'var(--green)',     fmtVal:fmtN(totP)},
+      {label:'Sessões',   val:totS, fmtVal:fmtN(totS)},
+      {label:'Buscas',    val:totB, fmtVal:fmtN(totB)},
+      {label:'Carrinhos', val:totC, fmtVal:fmtN(totC)},
+      {label:'Compras',   val:totP, fmtVal:fmtN(totP)},
     ]);
   })();
 
   // Funil Usuários
   drawFunnelSVG('funil-users-svg', [
-    {label:'Elegíveis',          val:710489, color:'var(--accent)', fmtVal:'710.489'},
-    {label:'Ativos',             val:97345,  color:'#7B6CF5',       fmtVal:'97.345'},
-    {label:'Compradores únicos', val:12367,  color:'var(--a2)',     fmtVal:'12.367'},
-    {label:'3+ compras',         val:2224,   color:'var(--green)',  fmtVal:'2.224'},
+    {label:'Elegíveis',          val:710489, fmtVal:'710.489'},
+    {label:'Ativos',             val:97345,  fmtVal:'97.345'},
+    {label:'Compradores únicos', val:12367,  fmtVal:'12.367'},
+    {label:'3+ compras',         val:2224,   fmtVal:'2.224'},
   ]);
 
   // CHART 3: Cobertura mensal
