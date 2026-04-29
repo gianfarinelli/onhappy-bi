@@ -157,6 +157,7 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
   <span class="s-lbl">B2C</span>
   <button class="nb" onclick="nav('input-diario')"><span>📥</span> Input Diário</button>
   <button class="nb" onclick="nav('funil')"><span>🔄</span> Funil</button>
+  <button class="nb" onclick="nav('take-rate')"><span>📈</span> Análise de Take Rate</button>
 </div>
 
 </nav>
@@ -759,20 +760,25 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
   </div>
 
   <!-- Cobertura -->
-  <!-- FUNIL DE ENGAJAMENTO (Sessões → Buscas → Carrinhos → Compras) -->
-  <div class="panel mb">
-    <div class="ptitle">📊 Funil de Engajamento
-      <span style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Jan–Abr/26 · ENG_HIST planilha</span>
-    </div>
-    <div style="position:relative;height:220px"><canvas id="c-funil-eng-chart"></canvas></div>
-  </div>
+  <!-- FUNIS VISUAIS lado a lado -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
 
-  <!-- FUNIL DE USUÁRIOS (Elegíveis → Ativos → Compradores → 3+) -->
-  <div class="panel mb">
-    <div class="ptitle">👥 Funil de Usuários
-      <span style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">Histórico completo · BQ real</span>
+    <!-- FUNIL DE ENGAJAMENTO -->
+    <div class="panel">
+      <div class="ptitle">📊 Funil de Engajamento
+        <span style="font-size:10px;background:var(--faint);color:var(--muted);padding:2px 8px;border-radius:6px;margin-left:6px">Jan–Abr/26</span>
+      </div>
+      <div id="funil-eng-svg" style="width:100%;padding:8px 0"></div>
     </div>
-    <div style="position:relative;height:220px"><canvas id="c-funil-users-chart"></canvas></div>
+
+    <!-- FUNIL DE USUÁRIOS -->
+    <div class="panel">
+      <div class="ptitle">👥 Funil de Usuários
+        <span style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">BQ real · histórico</span>
+      </div>
+      <div id="funil-users-svg" style="width:100%;padding:8px 0"></div>
+    </div>
+
   </div>
 
   <div class="panel mb">
@@ -782,44 +788,7 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
     <div style="position:relative;height:200px"><canvas id="c-funil-cob"></canvas></div>
   </div>
 
-  <!-- CHART: GMV Nacional vs Internacional — mês vigente -->
-  <div class="panel mb">
-    <div class="ptitle">🌎 GMV Diário — Nacional vs Internacional
-      <span id="ni-mes-label" style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">Abr/26 · BQ real</span>
-    </div>
-    <!-- KPIs resumo -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0 14px">
-      <div style="background:var(--faint);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px">GMV Nacional</div>
-        <div style="font-size:17px;font-weight:800;color:rgba(91,75,245,.9)" id="ni-kpi-nac">—</div>
-        <div style="font-size:10px;color:var(--muted)" id="ni-kpi-nac-sh">—</div>
-      </div>
-      <div style="background:var(--faint);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px">GMV Internacional</div>
-        <div style="font-size:17px;font-weight:800;color:rgba(0,201,167,.9)" id="ni-kpi-int">—</div>
-        <div style="font-size:10px;color:var(--muted)" id="ni-kpi-int-sh">—</div>
-      </div>
-      <div style="background:var(--faint);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px">TR Nacional</div>
-        <div style="font-size:17px;font-weight:800;color:rgba(91,75,245,.9)" id="ni-kpi-tr-nac">—</div>
-        <div style="font-size:10px;color:var(--muted)">média do mês</div>
-      </div>
-      <div style="background:var(--faint);border-radius:10px;padding:10px;text-align:center">
-        <div style="font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;margin-bottom:4px">TR Internacional</div>
-        <div style="font-size:17px;font-weight:800;color:rgba(0,201,167,.9)" id="ni-kpi-tr-int">—</div>
-        <div style="font-size:10px;color:var(--muted)">média do mês</div>
-      </div>
-    </div>
-    <div style="position:relative;height:220px"><canvas id="c-nac-int-gmv"></canvas></div>
-  </div>
 
-  <!-- CHART: Take Rate Nacional vs Internacional — mês vigente -->
-  <div class="panel mb">
-    <div class="ptitle">📊 Take Rate Diário — Nacional vs Internacional
-      <span style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">Abr/26 · BQ real</span>
-    </div>
-    <div style="position:relative;height:200px"><canvas id="c-nac-int-tr"></canvas></div>
-  </div>
 
   <!-- Tabela diária -->
   <div class="panel">
@@ -836,6 +805,55 @@ html,body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:
       </table>
       <div style="font-size:10px;color:var(--muted);margin-top:6px">* Dados com asterisco vêm do Input Diário manual</div>
     </div>
+  </div>
+</div>
+
+<div id="page-take-rate" class="page">
+  <div class="ph">
+    <div>
+      <div class="pt">📈 Análise de Take Rate</div>
+      <div class="ps">GMV e Take Rate por destino · Nacional vs Internacional · Mês vigente · BQ real</div>
+    </div>
+  </div>
+
+  <!-- KPIs resumo do mês -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+    <div class="card">
+      <div class="k-lbl">GMV Nacional</div>
+      <div class="k-val" id="tr-kpi-nac" style="color:rgba(91,75,245,.9)">—</div>
+      <div class="k-sub" id="tr-kpi-nac-sh">— do GMV</div>
+    </div>
+    <div class="card">
+      <div class="k-lbl">GMV Internacional</div>
+      <div class="k-val" id="tr-kpi-int" style="color:rgba(0,201,167,.9)">—</div>
+      <div class="k-sub" id="tr-kpi-int-sh">— do GMV</div>
+    </div>
+    <div class="card">
+      <div class="k-lbl">TR Médio Nacional</div>
+      <div class="k-val" id="tr-kpi-tr-nac" style="color:rgba(91,75,245,.9)">—</div>
+      <div class="k-sub">média Abr/26</div>
+    </div>
+    <div class="card">
+      <div class="k-lbl">TR Médio Internacional</div>
+      <div class="k-val" id="tr-kpi-tr-int" style="color:rgba(0,201,167,.9)">—</div>
+      <div class="k-sub">média Abr/26</div>
+    </div>
+  </div>
+
+  <!-- GMV Nacional vs Internacional -->
+  <div class="panel mb">
+    <div class="ptitle">🌎 GMV Diário — Nacional vs Internacional
+      <span id="tr-mes-label" style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">Abr/26 · BQ real</span>
+    </div>
+    <div style="position:relative;height:240px"><canvas id="c-nac-int-gmv"></canvas></div>
+  </div>
+
+  <!-- Take Rate Nacional vs Internacional -->
+  <div class="panel mb">
+    <div class="ptitle">📊 Take Rate Diário — Nacional vs Internacional
+      <span style="font-size:10px;background:var(--lilac);color:var(--accent);padding:2px 8px;border-radius:6px;margin-left:6px">Abr/26 · BQ real</span>
+    </div>
+    <div style="position:relative;height:220px"><canvas id="c-nac-int-tr"></canvas></div>
   </div>
 </div>
 
@@ -1697,271 +1715,67 @@ function renderFunil(){
     }
   });
 
-  // ── CHARTS Nacional vs Internacional — mês vigente dia a dia (BQ) ─────────
-  // Preenche KPIs
-  (function(){
-    const el=id=>document.getElementById(id);
-    if(el('ni-kpi-nac'))    el('ni-kpi-nac').textContent    = fmtR(CURR_MONTH.tot_nac);
-    if(el('ni-kpi-nac-sh')) el('ni-kpi-nac-sh').textContent = CURR_MONTH.share_total_nac+'% do GMV';
-    if(el('ni-kpi-int'))    el('ni-kpi-int').textContent    = fmtR(CURR_MONTH.tot_int);
-    if(el('ni-kpi-int-sh')) el('ni-kpi-int-sh').textContent = (100-CURR_MONTH.share_total_nac)+'% do GMV';
-    if(el('ni-kpi-tr-nac')) el('ni-kpi-tr-nac').textContent = CURR_MONTH.avg_tr_nac+'%';
-    if(el('ni-kpi-tr-int')) el('ni-kpi-tr-int').textContent = CURR_MONTH.avg_tr_int+'%';
-    if(el('ni-mes-label'))  el('ni-mes-label').textContent  = CURR_MONTH.mes+' · BQ real';
-  })();
 
-  // Gráfico 1: GMV empilhado + share % como linha
-  buildChart('c-nac-int-gmv','nac_int_gmv',{
-    type:'bar',
-    data:{labels:CURR_MONTH.labels,datasets:[
-      {label:'Nacional (R$)',data:CURR_MONTH.nac_gmv,backgroundColor:'rgba(91,75,245,.85)',stack:'s',borderRadius:{topLeft:0,topRight:0,bottomLeft:3,bottomRight:3}},
-      {label:'Internacional (R$)',data:CURR_MONTH.int_gmv,backgroundColor:'rgba(0,201,167,.85)',stack:'s',borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0}},
-      {label:'% Share Nacional',data:CURR_MONTH.share_nac,type:'line',borderColor:'#F6C344',backgroundColor:'transparent',pointRadius:3,pointHoverRadius:5,tension:.3,yAxisID:'y1',borderWidth:2},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.dataset.yAxisID==='y1'?(ctx.raw||0)+'%':fmtR(ctx.raw||0))}}
-      },
-      scales:{
-        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:31},grid:{color:'var(--faint)'}},
-        y:{stacked:true,ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}},
-        y1:{position:'right',min:0,max:100,ticks:{color:'#F6C344',font:{size:9},callback:v=>v+'%'},grid:{display:false}}
-      }
-    }
-  });
 
-  // Gráfico 2: TR Nacional vs Internacional dia a dia
-  buildChart('c-nac-int-tr','nac_int_tr',{
-    type:'line',
-    data:{labels:CURR_MONTH.labels,datasets:[
-      {label:'TR Nacional %',data:CURR_MONTH.nac_tr,borderColor:'rgba(91,75,245,.9)',backgroundColor:'rgba(91,75,245,.1)',pointRadius:3,pointHoverRadius:5,tension:.3,spanGaps:true,borderWidth:2,fill:true},
-      {label:'TR Internacional %',data:CURR_MONTH.int_tr,borderColor:'rgba(0,201,167,.9)',backgroundColor:'rgba(0,201,167,.1)',pointRadius:3,pointHoverRadius:5,tension:.3,spanGaps:true,borderWidth:2,fill:true},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.raw||0).toFixed(1)+'%'}}
-      },
-      scales:{
-        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:31},grid:{color:'var(--faint)'}},
-        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>v.toFixed(1)+'%'},grid:{color:'var(--faint)'},min:0,max:15}
-      }
-    }
-  });
+  // ── FUNÇÃO drawFunnelSVG ────────────────────────────────────────────────────
+  function drawFunnelSVG(containerId, steps) {
+    const el = document.getElementById(containerId);
+    if(!el) return;
+    const n = steps.length;
+    const maxVal = steps[0].val;
+    const W = Math.max(el.offsetWidth || 360, 260);
+    const slotH = 58;
+    const gap = 3;
+    const H = n * (slotH + gap) + 24;
+    const maxW = W * 0.88;
+    const minW = W * 0.18;
 
-    // CHART 2: GMV + Funil
-  const busArr=bq.map(r=>mmap[r.data]?.buscas||null);
-  const carArr=bq.map(r=>mmap[r.data]?.carrinhos||null);
-  buildChart('c-gmv-funil','gmv_funil',{
-    type:'bar',
-    data:{labels,datasets:[
-      {label:'GMV (R$)',data:bq.map(r=>r.gmv),backgroundColor:'rgba(91,75,245,.55)',yAxisID:'y',borderRadius:3,borderSkipped:false},
-      {label:'Buscas',data:busArr,type:'line',borderColor:'rgba(0,201,167,.9)',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
-      {label:'Carrinhos',data:carArr,type:'line',borderColor:'rgba(246,195,68,.9)',backgroundColor:'transparent',pointRadius:0,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
-      {label:'Compras (BQ)',data:bq.map(r=>r.p),type:'line',borderColor:'rgba(229,62,62,.9)',backgroundColor:'transparent',pointRadius:1,tension:.3,yAxisID:'y1',spanGaps:true,borderWidth:2},
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}}},
-      scales:{
-        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
-        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}},
-        y1:{position:'right',ticks:{color:'var(--muted)',font:{size:9}},grid:{display:false}}
-      }
-    }
-  });
+    let svg = `<svg viewBox="0 0 ${W} ${H}" width="100%" style="display:block;font-family:Arial,sans-serif">`;
 
-  // ── FIX 5: Boxes de conversão — usar dados acumulados de Abr/26 do BQ como default ──
-  // Pegar mês atual do BQ (Abr/26) para ter compras reais
-  const hoje = new Date().toISOString().slice(0,7); // YYYY-MM
-  const mesAtual = BQ_DAILY.filter(r=>r.data.startsWith(hoje));
-  const mesUsar = mesAtual.length >= 5 ? mesAtual : BQ_DAILY.filter(r=>r.data.startsWith('2026-04'));
+    steps.forEach((s, i) => {
+      const ratio  = maxVal > 0 ? s.val / maxVal : 0;
+      const curW   = minW + (maxW - minW) * ratio;
+      const prevW  = i === 0 ? curW : minW + (maxW - minW) * (steps[i-1].val / maxVal);
+      const topX   = (W - prevW) / 2;
+      const botX   = (W - curW)  / 2;
+      const y      = i * (slotH + gap);
+      const pts    = `${topX},${y} ${topX+prevW},${y} ${botX+curW},${y+slotH} ${botX},${y+slotH}`;
+      svg += `<polygon points="${pts}" fill="${s.color}"/>`;
+      // Label left
+      const pctTxt = i === 0 ? '' : ' · '+Math.round(s.val/maxVal*100)+'%';
+      svg += `<text x="6" y="${y+slotH/2+4}" font-size="10.5" font-weight="700" fill="var(--text)">${s.label}${pctTxt}</text>`;
+      // Value center
+      svg += `<text x="${W/2}" y="${y+slotH/2+4}" font-size="13" font-weight="800" fill="#fff" text-anchor="middle">${s.fmtVal}</text>`;
+    });
 
-  const totProtMes = mesUsar.reduce((a,r)=>a+r.p,0);
-  const totCuMes   = mesUsar.reduce((a,r)=>a+r.cu,0);
-
-  // Buscar dados manuais do mesmo período
-  const manual=getManual();
-  const manualMes=manual.filter(r=>r.data.startsWith(mesUsar[0]?.data?.slice(0,7)||'2026-04'));
-  const totSessMes=manualMes.reduce((a,r)=>a+(r.sessoes||0),0);
-  const totBuscMes=manualMes.reduce((a,r)=>a+(r.buscas||0),0);
-  const totCarrMes=manualMes.reduce((a,r)=>a+(r.carrinhos||0),0);
-
-  const rSB=totSessMes?totBuscMes/totSessMes*100:null;
-  const rBC=totBuscMes?totCarrMes/totBuscMes*100:null;
-  const rCC=totCarrMes?totProtMes/totCarrMes*100:null;
-  const rSC=totSessMes?totProtMes/totSessMes*100:null;
-  const cc=(v,g,o)=>v===null?'var(--muted)':v>=g?'#0FC98E':v>=o?'#F6C344':'#E53E3E';
-  const mesLabel=mesUsar[0]?.data?.slice(0,7).replace('-','/')?.replace('2026/04','Abr/26')||'Abr/26';
-
-  function setBox(id,val,rate,good,ok,ins){
-    const b=getEl(id);if(!b)return;
-    b.querySelector('.conv-val').textContent=val||'—';
-    const re=b.querySelector('.conv-rate');
-    if(re){re.textContent=rate!==null?fmtP(rate)+' conv.':'—';re.style.color=cc(rate,good,ok);}
-    const ie=b.querySelector('.conv-insight');if(ie)ie.textContent=ins;
+    svg += '</svg>';
+    el.innerHTML = svg;
   }
 
-  // Compras do BQ sempre disponíveis; sessões/buscas/carrinhos do Input
-  const semInput='Preencher Sessões/Buscas no Input Diário para completar análise';
-  setBox('conv-sessoes',
-    totSessMes?fmtN(totSessMes):'—',null,0,0,
-    totSessMes?`Sessões acumuladas em ${mesLabel}`:'Preencher Sessões no Input Diário');
-  setBox('conv-buscas',
-    totBuscMes?fmtN(totBuscMes):'—',rSB,55,40,
-    rSB===null?semInput:rSB>=55?`${fmtP(rSB)} sessão→busca. Engajamento alto ✓`:rSB>=40?`${fmtP(rSB)} — CTAs da home podem melhorar`:(`GARGALO: só ${fmtP(rSB)} chegam à busca`));
-  setBox('conv-carrinhos',
-    totCarrMes?fmtN(totCarrMes):'—',rBC,22,15,
-    rBC===null?semInput:rBC>=22?`${fmtP(rBC)} busca→carrinho ✓`:rBC>=15?`${fmtP(rBC)} — Melhorar relevância dos resultados`:(`GARGALO: só ${fmtP(rBC)} das buscas criam carrinho`));
-  setBox('conv-compras',
-    fmtN(totProtMes),rCC,20,12,
-    `${totProtMes} compras em ${mesLabel} (BQ)`+(rCC!==null?` | Conv. carrinho→compra: ${fmtP(rCC)}`:'. Preencha carrinhos no Input para ver taxa.'));
-
-  const rf=getEl('conv-rate-full');
-  if(rf){
-    const txt=rSC!==null
-      ?`Conversão ponta a ponta Sessão→Compra (${mesLabel}): ${fmtP2(rSC)} | Referência saudável: 0,80%`
-      :`Compras ${mesLabel}: ${totProtMes} (BQ real). Adicione Sessões/Buscas no Input Diário para ver conversão completa.`;
-    rf.textContent=txt;
-    rf.style.color=rSC!==null?cc(rSC,0.8,0.5):'var(--accent)';
-  }
-
-  // CHART 0: GMV Diário (canvas c-funil-gmv) — dados reais do BQ + linha de meta
-  const metaArr = bq.map(r => DAILY_META_BY_MONTH[r.data.slice(0,7)] || null);
-  buildChart('c-funil-gmv','gmv_daily',{
-    type:'bar',
-    data:{labels,datasets:[
-      {
-        label:'GMV (R$)',
-        data:bq.map(r=>r.gmv),
-        backgroundColor: bq.map((r,i) => (metaArr[i] && r.gmv >= metaArr[i])
-          ? 'rgba(15,155,110,.8)'   // verde: bateu meta
-          : 'rgba(91,75,245,.75)'), // roxo: abaixo da meta
-        borderRadius:3,
-        borderSkipped:false,
-        order:2,
-      },
-      {
-        label:'Meta diária',
-        data:metaArr,
-        type:'line',
-        borderColor:'rgba(246,195,68,.9)',
-        backgroundColor:'transparent',
-        borderDash:[5,4],
-        borderWidth:1.5,
-        pointRadius:0,
-        spanGaps:true,
-        order:1,
-      }
-    ]},
-    options:{responsive:true,maintainAspectRatio:false,
-      plugins:{
-        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
-        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtR(ctx.raw)}}
-      },
-      scales:{
-        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:14},grid:{color:'var(--faint)'}},
-        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}}
-      }
-    }
-  });
-
-  // ── FUNIL DE ENGAJAMENTO (dados do ENG_HIST — Jan–Abr/26) ─────────────────
+  // Funil Engajamento
   (function() {
-    // Agregar totais do ENG_HIST para o período filtrado
-    const engKeys = Object.keys(ENG_HIST);
-    const engFiltKeys = bq.map(r=>r.data).filter(d=>ENG_HIST[d]);
-    const totS = engFiltKeys.reduce((a,d)=>a+(ENG_HIST[d].sessoes||0),0);
-    const totB = engFiltKeys.reduce((a,d)=>a+(ENG_HIST[d].buscas||0),0);
-    const totC = engFiltKeys.reduce((a,d)=>a+(ENG_HIST[d].carrinhos||0),0);
-    // Compras vêm sempre do BQ (soma do período filtrado)
+    const mmap3 = Object.assign({}, ENG_HIST, getManualMap());
+    const engFiltKeys = bq.map(r=>r.data).filter(d=>mmap3[d]&&(mmap3[d].sessoes||mmap3[d].buscas));
+    const totS = engFiltKeys.reduce((a,d)=>a+(mmap3[d].sessoes||0),0);
+    const totB = engFiltKeys.reduce((a,d)=>a+(mmap3[d].buscas||0),0);
+    const totC = engFiltKeys.reduce((a,d)=>a+(mmap3[d].carrinhos||0),0);
     const totP = bq.reduce((a,r)=>a+r.p,0);
-    // Também incluir input manual
-    const mmap3 = getManualMap();
-    const mKeys = bq.map(r=>r.data).filter(d=>mmap3[d]&&(mmap3[d].sessoes||mmap3[d].buscas||mmap3[d].carrinhos));
-    const mS = mKeys.reduce((a,d)=>a+(mmap3[d].sessoes||0),0);
-    const mB = mKeys.reduce((a,d)=>a+(mmap3[d].buscas||0),0);
-    const mC = mKeys.reduce((a,d)=>a+(mmap3[d].carrinhos||0),0);
-    const fS = totS+mS, fB = totB+mB, fC = totC+mC;
 
-    const steps = [
-      {label:'Sessões',    val:fS,   color:'rgba(91,75,245,.85)'},
-      {label:'Buscas',     val:fB,   color:'rgba(0,150,220,.85)'},
-      {label:'Carrinhos',  val:fC,   color:'rgba(246,195,68,.85)'},
-      {label:'Compras',    val:totP, color:'rgba(15,155,110,.85)'},
-    ];
-
-    const pct = (v,t) => t>0 ? ' ('+Math.round(v/t*100)+'%)' : '';
-    const labels2 = steps.map((s,i) => i===0 ? s.label : s.label+pct(s.val,steps[0].val));
-    const vals    = steps.map(s=>s.val);
-    const colors  = steps.map(s=>s.color);
-
-    buildChart('c-funil-eng-chart','funil_eng',{
-      type:'bar',
-      data:{labels:labels2, datasets:[{
-        label:'Volume',data:vals,backgroundColor:colors,
-        borderRadius:6,borderSkipped:false,
-      }]},
-      options:{
-        indexAxis:'y',
-        responsive:true, maintainAspectRatio:false,
-        plugins:{
-          legend:{display:false},
-          tooltip:{callbacks:{
-            label:ctx=>' '+fmtN(ctx.raw)+
-              (ctx.dataIndex>0?' ('+Math.round(ctx.raw/vals[0]*100)+'% do topo)':'')
-          }}
-        },
-        scales:{
-          x:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>fmtN(v)},grid:{color:'var(--faint)'}},
-          y:{ticks:{color:'var(--text)',font:{size:10,weight:'600'}},grid:{display:false}}
-        }
-      }
-    });
+    drawFunnelSVG('funil-eng-svg', [
+      {label:'Sessões',   val:totS, color:'#5B4BF5', fmtVal:fmtN(totS)},
+      {label:'Buscas',    val:totB, color:'#1E90D4', fmtVal:fmtN(totB)},
+      {label:'Carrinhos', val:totC, color:'#E6A817', fmtVal:fmtN(totC)},
+      {label:'Compras',   val:totP, color:'#0F9B6E', fmtVal:fmtN(totP)},
+    ]);
   })();
 
-  // ── FUNIL DE USUÁRIOS (BQ real — histórico completo) ──────────────────────
-  (function() {
-    const elegiveis       = 710489;
-    const ativos          = 97345;
-    const compradores     = 12367;
-    const compradores_3p  = 2224;
-
-    const steps = [
-      {label:'Elegíveis',    val:elegiveis,      color:'rgba(91,75,245,.7)'},
-      {label:'Ativos',       val:ativos,         color:'rgba(91,75,245,.82)'},
-      {label:'Compradores únicos', val:compradores, color:'rgba(0,201,167,.85)'},
-      {label:'3+ compras',   val:compradores_3p, color:'rgba(15,155,110,.9)'},
-    ];
-
-    const pct = (v,t) => t>0?' ('+Math.round(v/t*100)+'%)':'' ;
-    const labels3 = steps.map((s,i) => i===0 ? s.label : s.label+pct(s.val,steps[0].val));
-    const vals    = steps.map(s=>s.val);
-    const colors  = steps.map(s=>s.color);
-
-    buildChart('c-funil-users-chart','funil_users',{
-      type:'bar',
-      data:{labels:labels3, datasets:[{
-        label:'Usuários',data:vals,backgroundColor:colors,
-        borderRadius:6,borderSkipped:false,
-      }]},
-      options:{
-        indexAxis:'y',
-        responsive:true, maintainAspectRatio:false,
-        plugins:{
-          legend:{display:false},
-          tooltip:{callbacks:{
-            label:ctx=>' '+fmtN(ctx.raw)+
-              (ctx.dataIndex>0?' ('+Math.round(ctx.raw/vals[0]*100)+'% dos elegíveis)':'')
-          }}
-        },
-        scales:{
-          x:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>fmtN(v)},grid:{color:'var(--faint)'}},
-          y:{ticks:{color:'var(--text)',font:{size:10,weight:'600'}},grid:{display:false}}
-        }
-      }
-    });
-  })();
+  // Funil Usuários
+  drawFunnelSVG('funil-users-svg', [
+    {label:'Elegíveis',          val:710489, color:'#5B4BF5', fmtVal:'710.489'},
+    {label:'Ativos',             val:97345,  color:'#7B6CF5', fmtVal:'97.345'},
+    {label:'Compradores únicos', val:12367,  color:'#0FC98E', fmtVal:'12.367'},
+    {label:'3+ compras',         val:2224,   color:'#0A8F65', fmtVal:'2.224'},
+  ]);
 
   // CHART 3: Cobertura mensal
   buildChart('c-funil-cob','cob',{
@@ -2004,6 +1818,60 @@ document.addEventListener('DOMContentLoaded', function() {
   window.VIDAS_MENSAIS_BQ = VIDAS_MENSAIS;
   window.VIDAS_CUM_BQ = VIDAS_CUM;
 });
+
+
+// ── RENDER TAKE RATE PAGE ─────────────────────────────────────────────────────
+function renderTakeRate() {
+  // Fill KPIs
+  const el = id => document.getElementById(id);
+  if(el('tr-kpi-nac'))    el('tr-kpi-nac').textContent    = fmtR(CURR_MONTH.tot_nac);
+  if(el('tr-kpi-nac-sh')) el('tr-kpi-nac-sh').textContent = CURR_MONTH.share_total_nac+'% do GMV';
+  if(el('tr-kpi-int'))    el('tr-kpi-int').textContent    = fmtR(CURR_MONTH.tot_int);
+  if(el('tr-kpi-int-sh')) el('tr-kpi-int-sh').textContent = (100-CURR_MONTH.share_total_nac)+'% do GMV';
+  if(el('tr-kpi-tr-nac')) el('tr-kpi-tr-nac').textContent = CURR_MONTH.avg_tr_nac+'%';
+  if(el('tr-kpi-tr-int')) el('tr-kpi-tr-int').textContent = CURR_MONTH.avg_tr_int+'%';
+  if(el('tr-mes-label'))  el('tr-mes-label').textContent  = CURR_MONTH.mes+' · BQ real';
+
+  // Chart: GMV Nac vs Int
+  buildChart('c-nac-int-gmv','nac_int_gmv',{
+    type:'bar',
+    data:{labels:CURR_MONTH.labels,datasets:[
+      {label:'Nacional (R$)',data:CURR_MONTH.nac_gmv,backgroundColor:'rgba(91,75,245,.85)',stack:'s',borderRadius:{topLeft:0,topRight:0,bottomLeft:3,bottomRight:3}},
+      {label:'Internacional (R$)',data:CURR_MONTH.int_gmv,backgroundColor:'rgba(0,201,167,.85)',stack:'s',borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0}},
+      {label:'% Share Nacional',data:CURR_MONTH.share_nac,type:'line',borderColor:'#F6C344',backgroundColor:'transparent',pointRadius:3,tension:.3,yAxisID:'y1',borderWidth:2},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.dataset.yAxisID==='y1'?(ctx.raw||0)+'%':fmtR(ctx.raw||0))}}
+      },
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:31},grid:{color:'var(--faint)'}},
+        y:{stacked:true,ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'},grid:{color:'var(--faint)'}},
+        y1:{position:'right',min:0,max:100,ticks:{color:'#F6C344',font:{size:9},callback:v=>v+'%'},grid:{display:false}}
+      }
+    }
+  });
+
+  // Chart: TR Nac vs Int
+  buildChart('c-nac-int-tr','nac_int_tr',{
+    type:'line',
+    data:{labels:CURR_MONTH.labels,datasets:[
+      {label:'TR Nacional %',data:CURR_MONTH.nac_tr,borderColor:'rgba(91,75,245,.9)',backgroundColor:'rgba(91,75,245,.1)',pointRadius:3,tension:.3,spanGaps:true,borderWidth:2,fill:true},
+      {label:'TR Internacional %',data:CURR_MONTH.int_tr,borderColor:'rgba(0,201,167,.9)',backgroundColor:'rgba(0,201,167,.1)',pointRadius:3,tension:.3,spanGaps:true,borderWidth:2,fill:true},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.raw||0).toFixed(1)+'%'}}
+      },
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:31},grid:{color:'var(--faint)'}},
+        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>v.toFixed(1)+'%'},grid:{color:'var(--faint)'},min:0,max:15}
+      }
+    }
+  });
+}
 
 // ── ANÁLISE DE CONVERSÃO COM FILTRO ──────────────────────────────────────────
 let convDays = '7';
@@ -2101,6 +1969,7 @@ function renderConvBoxes() {
     orig(id);
     if(id==='funil')setTimeout(renderFunil,60);
     if(id==='input-diario')inputRenderAll();
+    if(id==='take-rate')setTimeout(renderTakeRate,60);
   };
   // Convperiodo tabs precisam que convDays seja acessível globalmente
   window.convPeriodo = convPeriodo;
