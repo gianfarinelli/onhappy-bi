@@ -1914,7 +1914,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ── RENDER TAKE RATE PAGE ─────────────────────────────────────────────────────
 function renderTakeRate() {
-  // Fill KPIs
+  // KPIs
   const el = id => document.getElementById(id);
   if(el('tr-kpi-nac'))    el('tr-kpi-nac').textContent    = fmtR(CURR_MONTH.tot_nac);
   if(el('tr-kpi-nac-sh')) el('tr-kpi-nac-sh').textContent = CURR_MONTH.share_total_nac+'% do GMV';
@@ -1924,8 +1924,45 @@ function renderTakeRate() {
   if(el('tr-kpi-tr-int')) el('tr-kpi-tr-int').textContent = CURR_MONTH.avg_tr_int+'%';
   if(el('tr-mes-label'))  el('tr-mes-label').textContent  = CURR_MONTH.mes+' · BQ real';
 
-  // Chart: GMV Nac vs Int
-;
+  // Chart 1: GMV Nac vs Int — barras empilhadas + share % como linha
+  buildChart('c-nac-int-gmv','nac_int_gmv',{
+    type:'bar',
+    data:{labels:CURR_MONTH.labels, datasets:[
+      {label:'Nacional (R$)',       data:CURR_MONTH.nac_gmv, backgroundColor:'rgba(91,75,245,.85)',  stack:'s', borderRadius:{topLeft:0,topRight:0,bottomLeft:3,bottomRight:3}},
+      {label:'Internacional (R$)', data:CURR_MONTH.int_gmv, backgroundColor:'rgba(0,201,167,.85)',  stack:'s', borderRadius:{topLeft:3,topRight:3,bottomLeft:0,bottomRight:0}},
+      {label:'% Share Nacional',   data:CURR_MONTH.share_nac, type:'line', borderColor:'#F6C344', backgroundColor:'transparent', pointRadius:3, tension:.3, yAxisID:'y1', borderWidth:2},
+    ]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.dataset.yAxisID==='y1'?(ctx.raw||0)+'%':fmtR(ctx.raw||0))}}
+      },
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:31}, grid:{color:'var(--faint)'}},
+        y:{stacked:true, ticks:{color:'var(--muted)',font:{size:9},callback:v=>'R$'+Math.round(v/1000)+'k'}, grid:{color:'var(--faint)'}},
+        y1:{position:'right', min:0, max:100, ticks:{color:'#F6C344',font:{size:9},callback:v=>v+'%'}, grid:{display:false}}
+      }
+    }
+  });
+
+  // Chart 2: TR Nac vs Int — linhas com área
+  buildChart('c-nac-int-tr','nac_int_tr',{
+    type:'line',
+    data:{labels:CURR_MONTH.labels, datasets:[
+      {label:'TR Nacional %',       data:CURR_MONTH.nac_tr, borderColor:'rgba(91,75,245,.9)',  backgroundColor:'rgba(91,75,245,.12)', pointRadius:3, pointHoverRadius:5, tension:.3, spanGaps:true, borderWidth:2, fill:true},
+      {label:'TR Internacional %',  data:CURR_MONTH.int_tr, borderColor:'rgba(0,201,167,.9)',  backgroundColor:'rgba(0,201,167,.12)', pointRadius:3, pointHoverRadius:5, tension:.3, spanGaps:true, borderWidth:2, fill:true},
+    ]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{labels:{color:'var(--text)',font:{size:10},boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.raw||0).toFixed(1)+'%'}}
+      },
+      scales:{
+        x:{ticks:{color:'var(--muted)',font:{size:9},maxTicksLimit:31}, grid:{color:'var(--faint)'}},
+        y:{ticks:{color:'var(--muted)',font:{size:9},callback:v=>v.toFixed(1)+'%'}, grid:{color:'var(--faint)'}, min:0, max:15}
+      }
+    }
+  });
 }
 
 // ── ANÁLISE DE CONVERSÃO COM FILTRO ──────────────────────────────────────────
